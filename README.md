@@ -40,8 +40,9 @@ https://scientifica007.github.io/san3a-2/
 `public.san3a_profiles` و`public.san3a_reports`.
 
 من لوحة المشروع افتح `Authentication → URL Configuration`:
-- Site URL: `https://scientifica007.github.io/san3a-2/`
-- Redirect URLs: أضف الرابط نفسه.
+- **لا تغيّر Site URL الحالي**، لأن مشروع Supabase مشترك مع تطبيقات أخرى.
+- في `Redirect URLs` فقط أضف `https://scientifica007.github.io/san3a-2/`.
+- احفظ التغيير، ولا تحذف عناوين التطبيقات الأخرى.
 
 **ضروري قبل تسجيل عموم مستخدمي المؤسسات:** تفعيل خدمة إرسال بريد SMTP مخصصة من
 `Authentication → SMTP Settings`.

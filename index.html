@@ -82,6 +82,12 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:30px}
 <section id="adminView" class="hidden">
 <div class="row"><h2>لوحة المتابعة المركزية</h2><button id="refreshAdmin">تحديث البيانات</button></div>
 <div class="stats" id="adminStats"></div>
+<div class="card hidden" id="ownerPanel">
+ <div class="row"><div><h2>صلاحيات الإدارة — المالك فقط</h2>
+ <p class="muted">يمكنك تعيين مسؤول تشغيل أو إلغاء صلاحياته دون تسليمه حسابك أو كلمة مرورك.</p></div><span class="badge">Owner</span></div>
+ <div class="table-scroll"><table><thead><tr><th>الحساب</th><th>الدور</th><th>الحالة</th><th>إدارة الصلاحية</th></tr></thead><tbody id="ownerUsersBody"></tbody></table></div>
+ <p id="roleAudit" class="muted"></p>
+</div>
 <div class="card"><h2>طلبات اعتماد حسابات المؤسسات</h2><div class="table-scroll"><table><thead><tr><th>المستخدم</th><th>المؤسسة المطلوبة</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="accountsBody"></tbody></table></div></div>
 <div class="card"><div class="row"><h2>تقارير المؤسسات</h2><div class="actions"><select id="reportFilter" aria-label="حالة التقرير"><option value="all">جميع التقارير</option><option value="submitted">المرسلة فقط</option><option value="draft">المسودات</option></select><button id="downloadAdminCsv">تصدير سجل التقارير</button></div></div>
 <div class="table-scroll"><table><thead><tr><th>المؤسسة</th><th>المستخدم</th><th>الأسبوع</th><th>الحالة</th><th>آخر تحديث</th><th>عرض</th></tr></thead><tbody id="reportsBody"></tbody></table></div>
@@ -159,7 +165,10 @@ async function loadCurrentUser(){
    show('pendingView');$('pendingTitle').textContent=profile.status==='rejected'?'لم يُعتمد الحساب':'الحساب قيد المراجعة';
    $('pendingText').textContent=profile.status==='rejected'?'اتصل بمسؤول المنصة لتصحيح بيانات المؤسسة.':'ستتمكن من إدخال التقارير بعد اعتماد المؤسسة من مسؤول المنصة.';return;
   }
-  if(profile.role==='admin'){show('adminView');await refreshAdmin();subscribeAdmin();}
+  if(profile.role==='admin'||profile.role==='owner'){
+   show('adminView');$('ownerPanel').classList.toggle('hidden',profile.role!=='owner');
+   await refreshAdmin();subscribeAdmin();
+  }
   else{show('memberView');$('memberInstitution').textContent=profile.institution_name||'';await initializeMember();}
  }catch(e){msg('تعذر تحميل الحساب: '+e.message,true);show('authView');}
 }
@@ -274,6 +283,38 @@ async function refreshAdmin(){
  adminProfiles=ps.data||[];adminReports=rs.data||[];
  $('adminStats').innerHTML=[['المؤسسات',new Set(adminProfiles.filter(p=>p.status==='active'&&p.role==='member').map(p=>p.institution_name)).size],['التقارير المرسلة',adminReports.filter(r=>r.status==='submitted').length],['المسودات',adminReports.filter(r=>r.status==='draft').length],['طلبات انتظار الاعتماد',adminProfiles.filter(p=>p.role==='member'&&p.status==='pending').length]].map(a=>'<div class="stat"><span class="muted">'+a[0]+'</span><b>'+a[1]+'</b></div>').join('');
  renderProfiles();renderReports();
+ if(profile?.role==='owner') await renderOwnerUsers();
+}
+async function renderOwnerUsers(){
+ const roleName={owner:'المالك',admin:'مسؤول التشغيل',member:'مستخدم مؤسسة'};
+ $('ownerUsersBody').innerHTML=adminProfiles.map(p=>{
+  let action='<span class="muted">محمي</span>';
+  if(p.role==='admin')action='<button class="danger" data-revoke-admin="'+esc(p.user_id)+'">إلغاء صلاحية Admin</button>';
+  else if(p.role==='member'&&p.user_id!==user.id)
+   action='<button class="primary" data-grant-admin="'+esc(p.user_id)+'">تعيين Admin</button>';
+  return '<tr><td><b>'+esc(p.full_name||'—')+'</b><div class="muted">'+esc(p.email)+'</div></td><td>'+esc(roleName[p.role]||p.role)+'</td><td>'+esc(p.status==='active'?'نشط':p.status==='pending'?'في انتظار الاعتماد':'مرفوض')+'</td><td>'+action+'</td></tr>';
+ }).join('');
+ $('ownerUsersBody').querySelectorAll('[data-grant-admin]').forEach(btn=>btn.onclick=()=>changeAdminRole(btn.dataset.grantAdmin,true));
+ $('ownerUsersBody').querySelectorAll('[data-revoke-admin]').forEach(btn=>btn.onclick=()=>changeAdminRole(btn.dataset.revokeAdmin,false));
+ const {data,error}=await sb.from('san3a_role_events').select('occurred_at,operation,target_user_id')
+ .order('occurred_at',{ascending:false}).limit(5);
+ $('roleAudit').textContent=error?'تعذر عرض سجل الصلاحيات.':data?.length?'آخر تغيير للصلاحيات: '+new Date(data[0].occurred_at).toLocaleString('ar-DZ'):'لم تُسجّل تغييرات على صلاحيات المسؤولين بعد.';
+}
+async function changeAdminRole(targetId,grant){
+ if(profile?.role!=='owner'){msg('هذا الإجراء متاح للمالك فقط.',true);return;}
+ const p=adminProfiles.find(x=>x.user_id===targetId);
+ if(!p||p.role==='owner'||targetId===user.id){msg('لا يمكن تعديل صلاحية المالك.',true);return;}
+ const action=grant?'تعيين هذا الحساب مسؤولًا تشغيليًا':'إلغاء صلاحية Admin وإعادة الحساب إلى انتظار الاعتماد';
+ if(!confirm(action+' — '+p.email+'؟'))return;
+ const name=grant?'grant-admin':'revoke-admin';
+ const btn=$('ownerUsersBody').querySelector('[data-'+name+'="'+targetId+'"]');
+ if(btn)btn.disabled=true;
+ try{
+  const {error}=await sb.rpc('san3a_owner_set_admin',{p_target_id:targetId,p_grant:grant});
+  if(error)throw error;
+  msg(grant?'تم تعيين المسؤول التشغيلي.':'أُلغيت صلاحية المسؤول وأعيد الحساب إلى انتظار الاعتماد.');
+  await refreshAdmin();
+ }catch(e){msg('تعذر تغيير الصلاحية: '+e.message,true);if(btn)btn.disabled=false;}
 }
 function renderProfiles(){
  const p=adminProfiles.filter(x=>x.role==='member');

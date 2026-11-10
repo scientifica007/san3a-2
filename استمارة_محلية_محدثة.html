@@ -82,8 +82,10 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:22px}
 <div class="btnrow no-print">
 <button class="btn primary" id="exportCsv">تنزيل الجداول الثلاثة CSV</button>
 <button class="btn" id="print">طباعة / حفظ PDF</button>
-<button class="btn" id="submit">إرسال التقرير الأسبوعي</button>
+<button class="btn primary" id="submit">إرسال عبر Gmail</button>
+<button class="btn" id="submitCentral">إرسال إلى النظام المركزي (إن كان متاحًا)</button>
 </div>
+<p class="hint no-print">يفتح زر Gmail رسالة جاهزة تحتوي على الجداول الثلاثة. إذا كان التقرير كبيرًا، يُنزَّل ثلاثة ملفات CSV لإرفاقها يدويًا. يتولى المرسل الضغط على «إرسال» داخل Gmail.</p>
 <div id="tables"></div>
 </div>
 </section>
@@ -122,7 +124,7 @@ function init(){
  $('loadAll').onclick=loadAll; $('addSpec').onclick=()=>addEntry({specialty:"تخصص جديد"});
  $('resetSpecs').onclick=loadInstitution; $('toPreview').onclick=()=>switchTab('preview');
  $('saveLocal').onclick=saveLocal; $('exportCsv').onclick=exportCsv; $('print').onclick=()=>window.print();
- $('submit').onclick=submitReport; $('loadAdmin').onclick=loadAdmin;
+ $('submit').onclick=sendViaGmail; $('submitCentral').onclick=submitReport; $('loadAdmin').onclick=loadAdmin;
  $('adminExcel').onclick=()=>adminExport('excel'); $('adminWord').onclick=()=>adminExport('word');
  document.querySelectorAll('.tab').forEach(x=>x.onclick=()=>switchTab(x.dataset.tab));
  $('startDate').value=new Date().toISOString().slice(0,10);
@@ -229,6 +231,81 @@ function exportCsv(){
  [table1,table2,table3].forEach((t,i)=>download(`صنعة2_الجدول_${i+1}_الأسبوع_${p.week||''}.csv`,[...meta,...t].map(r=>r.map(csvCell).join(';')).join('\r\n'),'text/csv;charset=utf-8'));
 }
 function saveLocal(){const p=collect();localStorage.setItem('san3a2_draft',JSON.stringify(p));alert('تم حفظ المسودة على هذا الجهاز والمتصفح.');}
+
+/* فتح Gmail برسالة جديدة دون ادعاء إرسالها تلقائيًا. */
+const GMAIL_RECIPIENT='labeik.redouane@gmail.com';
+function gmailComposeUrl(subject,body){
+ return 'https://mail.google.com/mail/?view=cm&fs=1&to='+encodeURIComponent(GMAIL_RECIPIENT)+
+  '&su='+encodeURIComponent(subject)+'&body='+encodeURIComponent(body);
+}
+function gmailReportBody(p){
+ const lines=[
+  'المتابعة الأسبوعية لسير التكوين — جهاز صنعة 2',
+  'المؤسسة: '+p.institution,
+  'الأسبوع: '+(p.week||'غير محدد'),
+  'الفترة: '+(p.startDate||'—')+' إلى '+(p.endDate||'—'),
+  'المسؤول / المرسل: '+(p.sender||'—'),
+  'عدد التخصصات: '+p.entries.length,'',
+  'الجدول 01 — حضور وغياب المتربصين'
+ ];
+ p.entries.forEach((e,i)=>{
+  const c=e.calculated;
+  lines.push((i+1)+'. '+e.institution+' — '+e.specialty,
+   'عدد المتربصين: '+e.attendance.total);
+  e.attendance.days.forEach((d,j)=>lines.push(
+   'اليوم '+(j+1)+' ('+(d.date||'بدون تاريخ')+'): الحاضرون '+d.present+
+   '، الغائبون '+Math.max(0,e.attendance.total-d.present)+
+   '، نسبة الحضور '+c.rates[j].toFixed(2)+'%'));
+  lines.push('الحضور الأسبوعي: '+c.weekly.toFixed(2)+
+   '%؛ متوسط الحاضرين: '+c.avgPresent.toFixed(2)+
+   '؛ متوسط الغائبين: '+c.avgAbsent.toFixed(2),
+   'الملاحظات: '+(e.attendance.notes||'—'),'');
+ });
+ lines.push('الجدول 02 — تقدم تنفيذ البرامج التكوينية');
+ p.entries.forEach((e,i)=>{
+  const c=e.calculated;
+  lines.push((i+1)+'. '+e.institution+' — '+e.specialty);
+  e.program.days.forEach((d,j)=>lines.push('اليوم '+(j+1)+
+   ': المبرمج '+d.scheduled+' ساعة، المنجز '+d.actual+' ساعة'));
+  lines.push('إجمالي المبرمج: '+c.scheduled.toFixed(2)+
+   '؛ إجمالي المنجز: '+c.actual.toFixed(2)+
+   '؛ نسبة الإنجاز: '+c.progress.toFixed(2)+'%؛ التأخر: '+c.delay.toFixed(2)+' ساعة',
+   'أسباب التأخر: '+(e.program.reasons||'—'),'');
+ });
+ lines.push('الجدول 03 — الحصيلة الأسبوعية والتقييم العام');
+ p.entries.forEach((e,i)=>{
+  const c=e.calculated;
+  lines.push((i+1)+'. '+e.institution+' — '+e.specialty,
+   'نسبة الحضور: '+c.weekly.toFixed(2)+'%؛ نسبة تقدم البرامج: '+c.progress.toFixed(2)+'%',
+   'وضعية التأطير البيداغوجي: '+(e.evaluation.supervision||'—'),
+   'الصعوبات والنقائص: '+(e.evaluation.difficulties||'—'),
+   'التدابير التصحيحية: '+(e.evaluation.measures||'—'),'');
+ });
+ return lines.join('\n');
+}
+function sendViaGmail(){
+ const p=collect();
+ if(!p.institution||!p.entries.length){
+  alert('يرجى تحديد المؤسسة وإدراج تخصص واحد على الأقل.');return;
+ }
+ const subject='صنعة 2 — التقرير الأسبوعي — '+p.institution+
+  ' — الأسبوع '+(p.week||'غير محدد');
+ let body=gmailReportBody(p), url=gmailComposeUrl(subject,body);
+ let attachManually=false;
+ // تتجاوز بعض المتصفحات حد الرابط عند وجود عشرات التخصصات.
+ if(url.length>12000){
+  exportCsv();attachManually=true;
+  body='التقرير الأسبوعي لجهاز صنعة 2\nالمؤسسة: '+p.institution+
+   '\nالأسبوع: '+(p.week||'غير محدد')+
+   '\nمن: '+(p.startDate||'—')+' إلى: '+(p.endDate||'—')+
+   '\nعدد التخصصات: '+p.entries.length+
+   '\n\nيرجى إرفاق ملفات CSV الثلاثة التي نزّلها التطبيق قبل إرسال الرسالة.';
+  url=gmailComposeUrl(subject,body);
+ }
+ const newTab=window.open(url,'_blank');
+ if(!newTab){window.location.assign(url);}
+ if(attachManually)alert('تم تنزيل الجداول الثلاثة بصيغة CSV. أرفق الملفات في رسالة Gmail المفتوحة ثم اضغط «إرسال».');
+}
 function submitReport(){
  const payload=collect();if(!payload.institution||!payload.entries.length){alert('يرجى تحديد المؤسسة وإدراج تخصص واحد على الأقل.');return;}
  if(typeof google!=='undefined'&&google.script&&google.script.run){

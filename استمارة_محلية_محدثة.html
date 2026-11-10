@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>المتابعة الأسبوعية لسير التكوين - جهاز صنعة 2</title>
+<style>
+:root{--blue:#1a73e8;--ink:#202124;--muted:#5f6368;--line:#dadce0;--bg:#f8fafd;--green:#188038;--red:#d93025}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:Arial,"Noto Naskh Arabic",sans-serif;line-height:1.55}
+header{background:#fff;border-bottom:1px solid var(--line);padding:18px max(18px,calc((100% - 1180px)/2))}
+.brand{display:flex;align-items:center;gap:12px}.logo{width:42px;height:42px;border-radius:12px;background:#e8f0fe;color:var(--blue);display:grid;place-items:center;font-weight:bold;font-size:20px}
+h1{font-size:20px;margin:0}header p{margin:3px 0 0;color:var(--muted);font-size:13px}
+main{max-width:1180px;margin:24px auto;padding:0 16px}
+.tabs{display:flex;gap:8px;overflow:auto;border-bottom:1px solid var(--line);margin-bottom:18px}
+.tab{border:0;background:transparent;padding:12px 16px;white-space:nowrap;color:var(--muted);font-weight:600;cursor:pointer;border-bottom:3px solid transparent}
+.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+.panel{display:none}.panel.active{display:block}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:0 1px 2px #00000008}
+h2{font-size:18px;margin:0 0 14px}h3{font-size:16px;margin:0 0 12px}
+.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.field{display:flex;flex-direction:column;gap:5px;min-width:0}.field label{font-size:13px;color:#3c4043;font-weight:600}
+input,select,textarea{font:inherit;border:1px solid #c7cbd1;border-radius:8px;padding:10px;background:#fff;min-width:0;width:100%;color:var(--ink)}
+input:focus,select:focus,textarea:focus{outline:2px solid #d2e3fc;border-color:var(--blue)}
+textarea{min-height:72px;resize:vertical}
+.btn{border:1px solid var(--line);border-radius:8px;background:#fff;padding:10px 14px;cursor:pointer;font-weight:600;color:#3c4043}
+.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.btn.soft{background:#e8f0fe;color:#174ea6;border-color:#d2e3fc}.btn.danger{color:var(--red);border-color:#f2c9c7}
+.btnrow{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.hint{font-size:12px;color:var(--muted)}.notice{background:#e8f0fe;border-radius:10px;padding:12px;color:#174ea6;font-size:13px;margin:12px 0}
+.specialty{border:1px solid var(--line);border-radius:12px;margin:14px 0;overflow:hidden;background:#fff}
+.spec-head{display:flex;justify-content:space-between;align-items:center;gap:10px;background:#f1f3f4;padding:12px 14px}
+.spec-head input{max-width:460px;background:#fff;font-weight:700}
+.spec-body{padding:14px}.subgrid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+.section-title{font-weight:700;color:#174ea6;border-bottom:1px solid #e8eaed;padding-bottom:7px;margin:18px 0 10px}
+.daygrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.metric{font-weight:700;color:var(--green);background:#e6f4ea;border-radius:8px;padding:9px;text-align:center}
+.tablewrap{overflow:auto}table{width:100%;border-collapse:collapse;background:#fff;font-size:13px;min-width:850px}
+th,td{border:1px solid #c8cdd2;padding:8px;text-align:center;vertical-align:middle}
+th{background:#e8f0fe;color:#174ea6;font-weight:700}td input,td textarea{min-width:90px;padding:6px}
+.summary{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.summary>div{background:#f8fafd;border:1px solid var(--line);border-radius:10px;padding:12px}
+.small{font-size:12px;color:var(--muted)}.hidden{display:none!important}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:22px}
+@media(max-width:760px){.grid,.subgrid{grid-template-columns:repeat(2,minmax(0,1fr))}.daygrid{grid-template-columns:1fr}.summary{grid-template-columns:repeat(2,1fr)}main{padding:0 10px}.card{padding:13px}}
+@media print{header,.tabs,.no-print,.btn,footer{display:none!important}body{background:#fff}main{max-width:none;margin:0;padding:0}.panel{display:block!important}.card,.specialty{break-inside:avoid;box-shadow:none}.tablewrap{overflow:visible}table{min-width:0;font-size:9px}th,td{padding:4px}}
+</style></head>
+<body>
+<header><div class="brand"><div class="logo">ص2</div><div><h1>استمارة المتابعة الأسبوعية لسير التكوين</h1><p>جهاز صنعة 2 — نموذج إلكتروني متعدد المؤسسات والتخصصات</p></div></div></header>
+<main>
+<div class="tabs no-print">
+<button class="tab active" data-tab="entry">1. إدخال المعطيات</button>
+<button class="tab" data-tab="preview">2. معاينة الجداول الثلاثة والتصدير</button>
+<button class="tab" data-tab="admin">3. الإدارة والربط بـ Google</button>
+</div>
+<section id="entry" class="panel active">
+<div class="card">
+<h2>المعلومات العامة</h2>
+<div class="grid">
+<div class="field"><label>المؤسسة التكوينية</label><select id="institution"></select></div>
+<div class="field"><label>تسمية المؤسسة (قابلة للتعديل)</label><input id="institutionName" placeholder="تسمية المؤسسة"></div>
+<div class="field"><label>الأسبوع رقم</label><input id="week" type="text" placeholder="مثال: 01"></div>
+<div class="field"><label>من تاريخ</label><input id="startDate" type="date"></div>
+<div class="field"><label>إلى تاريخ</label><input id="endDate" type="date"></div>
+<div class="field"><label>اسم المسؤول / المرسل (اختياري)</label><input id="sender" placeholder="الاسم والصفة"></div>
+</div>
+<div class="notice">اختر المؤسسة لتحميل تخصصاتها المسجلة في الملف المرجعي. يمكنك تعديل أسماء التخصصات، إضافة تخصص أو حذفه. كل تخصص يحتفظ ببياناته المستقلة.</div>
+<div class="btnrow no-print">
+<button class="btn soft" id="loadAll">استيراد كل المؤسسات والتخصصات (36 سطراً)</button>
+<button class="btn" id="addSpec">+ إضافة تخصص جديد</button>
+<button class="btn" id="resetSpecs">إعادة تخصصات المؤسسة المختارة</button>
+</div>
+<div class="small" id="specCount"></div>
+</div>
+<div id="specialties"></div>
+<div class="btnrow no-print">
+<button class="btn primary" id="toPreview">معاينة الجداول الثلاثة ←</button>
+<button class="btn" id="saveLocal">حفظ مسودة على هذا الجهاز</button>
+</div>
+</section>
+<section id="preview" class="panel">
+<div class="card">
+<h2>معاينة الجداول الرسمية</h2>
+<p class="hint">تعرض الجداول البيانات المحسوبة لكل تخصص. يمكنك الطباعة أو تنزيل ملف CSV لكل جدول. في النسخة المنشورة على Google Apps Script، تُرسل البيانات إلى جدول مركزي في حساب مالك التطبيق.</p>
+<div class="summary" id="summary"></div>
+<div class="btnrow no-print">
+<button class="btn primary" id="exportCsv">تنزيل الجداول الثلاثة CSV</button>
+<button class="btn" id="print">طباعة / حفظ PDF</button>
+<button class="btn" id="submit">إرسال التقرير الأسبوعي</button>
+</div>
+<div id="tables"></div>
+</div>
+</section>
+<section id="admin" class="panel">
+<div class="card">
+<h2>الإدارة والربط بـ Google</h2>
+<div class="notice">بعد نشر المشروع من حسابك، تحفظ تقارير المؤسسات في Google Sheets مركزي تابع لحسابك. لوحة الإدارة محمية برمز الإدارة الذي يظهر لك عند تشغيل دالة setup لأول مرة.</div>
+<div class="grid">
+<div class="field"><label>رمز الإدارة</label><input id="adminPin" type="password" placeholder="أدخل رمز الإدارة"></div>
+<div class="field" style="justify-content:end"><button class="btn primary" id="loadAdmin">عرض التقارير المستلمة</button></div>
+</div>
+<div id="adminResult"></div>
+<div class="btnrow no-print">
+<button class="btn" id="adminExcel">إنشاء ملف Excel مجمع</button>
+<button class="btn" id="adminWord">إنشاء تقرير Word مجمع</button>
+</div>
+</div>
+<div class="card">
+<h3>حالة الربط</h3><div id="connectionStatus" class="small">إذا فتحت هذه الصفحة من رابط Google Apps Script فالإرسال المباشر متاح. عند فتح ملف HTML محلياً، تعمل المعاينة والحفظ المحلي والتصدير دون إرسال مركزي.</div>
+</div>
+</section>
+</main>
+<footer>استمارة المتابعة الأسبوعية — جهاز صنعة 2</footer>
+<script>
+const INSTITUTIONS = [{"name": "مركز التكوين المهني و التمهين  المحمل", "specialties": ["التلحيم", "الطلاء", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين  خنشلة01", "specialties": ["التلحيم", "الطلاء"]}, {"name": "مركز التكوين المهني و التمهين  لمصارة", "specialties": ["الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين الحامة", "specialties": ["السباكة (التركيب الصحي)"]}, {"name": "مركز التكوين المهني و التمهين أولاد رشاش", "specialties": ["التلحيم", "الطلاء"]}, {"name": "مركز التكوين المهني و التمهين بابار", "specialties": ["التجصيص و BA13", "السباكة", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين تاوزيانت", "specialties": ["الخياطة"]}, {"name": "مركز التكوين المهني و التمهين خنشلة 03", "specialties": ["التجصيص و BA13", "التلحيم", "الطلاء"]}, {"name": "مركز التكوين المهني و التمهين ششار", "specialties": ["التلحيم", "السباكة", "الطلاء", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين طامزة", "specialties": ["التبريد و التكييف"]}, {"name": "مركز التكوين المهني و التمهين عين الطويلة", "specialties": ["السباكة", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين قايس 2", "specialties": ["السباكة (التركيب الصحي)"]}, {"name": "مركز التكوين المهني و التمهين قايس 01", "specialties": ["التبريد و التكييف", "الطلاء", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين متوسة", "specialties": ["الطلاء", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين الرميلة", "specialties": ["التبريد و التكييف", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني والتمهين خنشلة02", "specialties": ["الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين بوحمامة", "specialties": ["التبريد و التكييف", "الطلاء"]}, {"name": "المعهد الوطني المتخصص في التكوين المهني خنشلة", "specialties": ["الكهرباء المعمارية"]}, {"name": "المعهد الوطني المتخصص في التكوين المهني قايس", "specialties": ["التبريد و التكييف"]}];
+let entries = [];
+let selectedInstitution = "";
+const $ = id => document.getElementById(id);
+const esc = s => String(s??"").replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const pct = (a,b) => (Number(b)>0 ? Math.round(Number(a)/Number(b)*10000)/100 : 0);
+const n = v => Number(v)||0;
+function switchTab(id){document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('active',x.dataset.tab===id));document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('active',x.id===id));if(id==='preview')renderPreview();}
+function init(){
+ $('institution').innerHTML=INSTITUTIONS.map((x,i)=>`<option value="${i}">${esc(x.name)}</option>`).join('');
+ $('institution').addEventListener('change',loadInstitution);
+ $('loadAll').onclick=loadAll; $('addSpec').onclick=()=>addEntry({specialty:"تخصص جديد"});
+ $('resetSpecs').onclick=loadInstitution; $('toPreview').onclick=()=>switchTab('preview');
+ $('saveLocal').onclick=saveLocal; $('exportCsv').onclick=exportCsv; $('print').onclick=()=>window.print();
+ $('submit').onclick=submitReport; $('loadAdmin').onclick=loadAdmin;
+ $('adminExcel').onclick=()=>adminExport('excel'); $('adminWord').onclick=()=>adminExport('word');
+ document.querySelectorAll('.tab').forEach(x=>x.onclick=()=>switchTab(x.dataset.tab));
+ $('startDate').value=new Date().toISOString().slice(0,10);
+ $('endDate').value=new Date().toISOString().slice(0,10);
+ loadInstitution();
+ if(typeof google!=='undefined' && google.script && google.script.run){$('connectionStatus').textContent='متصل بواجهة Google Apps Script — الإرسال المركزي متاح.';}
+}
+function loadInstitution(){
+ const idx=n($('institution').value), inst=INSTITUTIONS[idx]; selectedInstitution=inst.name;
+ $('institutionName').value=inst.name; entries=[]; inst.specialties.forEach(s=>addEntry({specialty:s}));
+ updateCount();
+}
+function loadAll(){
+ $('institution').value=''; $('institutionName').value='كل المؤسسات التكوينية'; selectedInstitution='كل المؤسسات التكوينية'; entries=[];
+ INSTITUTIONS.forEach(inst=>inst.specialties.forEach(s=>addEntry({specialty:s,institution:inst.name})));
+ updateCount(); renderEntries();
+}
+function addEntry(data={}){
+ const id='sp_'+Math.random().toString(36).slice(2,10);
+ entries.push({id,institution:data.institution||$('institutionName').value||selectedInstitution,specialty:data.specialty||'',attendance:{total:0,days:[{date:'',present:0},{date:'',present:0},{date:'',present:0}],notes:''},program:{days:[{scheduled:0,actual:0},{scheduled:0,actual:0},{scheduled:0,actual:0}],reasons:''},evaluation:{supervision:'',difficulties:'',measures:''}});
+ renderEntries(); updateCount(); return id;
+}
+function removeEntry(id){entries=entries.filter(x=>x.id!==id);renderEntries();updateCount();}
+function updateCount(){$('specCount').textContent=`عدد التخصصات المدرجة: ${entries.length} — عدد المؤسسات المرجعية: ${INSTITUTIONS.length}`;}
+function field(label,id,value,type='number',extra=''){return `<div class="field"><label>${label}</label><input type="${type}" id="${id}" value="${esc(value)}" ${extra}></div>`;}
+function renderEntries(){
+ $('specialties').innerHTML=entries.map((e,i)=>`
+ <article class="specialty" data-id="${e.id}">
+ <div class="spec-head"><strong>التخصص رقم ${i+1}</strong><input aria-label="تسمية التخصص" data-k="specialty" value="${esc(e.specialty)}" placeholder="اسم التخصص"><button class="btn danger no-print" onclick="removeEntry('${e.id}')">حذف التخصص</button></div>
+ <div class="spec-body">
+ <div class="field"><label>المؤسسة التابعة لهذا التخصص</label><input data-k="institution" value="${esc(e.institution)}"></div>
+ <div class="section-title">الجدول 01 — وضعية حضور وغياب المتربصين</div>
+  <div class="subgrid">${field('العدد الإجمالي للمتربصين',e.id+'_total',e.attendance.total)}<div class="metric" id="${e.id}_weekly">نسبة الحضور الأسبوعية: 0%</div><div class="metric" id="${e.id}_avgPresent">متوسط الحاضرين: 0</div><div class="metric" id="${e.id}_avgAbsent">متوسط الغائبين: 0</div></div>
+  <div class="daygrid">${e.attendance.days.map((d,j)=>`<div class="card" style="padding:10px;margin:0"><strong>اليوم ${j+1}</strong>${field('التاريخ',e.id+'_date'+j,d.date,'date')}${field('عدد الحاضرين',e.id+'_present'+j,d.present)}<div class="small" id="${e.id}_day${j}">الغائبون: 0 — الحضور: 0%</div></div>`).join('')}</div>
+  <div class="field"><label>ملاحظات التخصص</label><textarea id="${e.id}_attendanceNotes">${esc(e.attendance.notes||'')}</textarea></div>
+  <div class="section-title">الجدول 02 — تقدم تنفيذ البرامج التكوينية</div>
+  <div class="daygrid">${e.program.days.map((d,j)=>`<div class="card" style="padding:10px;margin:0"><strong>اليوم ${['الأول','الثاني','الثالث'][j]}</strong>${field('الحجم الساعي المبرمج (ساعة)',e.id+'_scheduled'+j,d.scheduled)}${field('الحجم الساعي المنجز (ساعة)',e.id+'_actual'+j,d.actual)}</div>`).join('')}</div>
+  <div class="subgrid"><div class="metric" id="${e.id}_totalScheduled">إجمالي الساعات المبرمجة: 0</div><div class="metric" id="${e.id}_totalActual">إجمالي الساعات المنجزة: 0</div><div class="metric" id="${e.id}_progress">نسبة التقدم الأسبوعية: 0%</div><div class="metric" id="${e.id}_delay">التأخر المسجل: 0 ساعة</div><div class="field"><label>أسباب التأخر</label><textarea id="${e.id}_reasons">${esc(e.program.reasons)}</textarea></div></div>
+ <div class="section-title">الجدول 03 — الحصيلة الأسبوعية والتقييم العام</div>
+ <div class="subgrid"><div class="metric" id="${e.id}_evalAttendance">نسبة الحضور: 0%</div><div class="metric" id="${e.id}_evalProgress">نسبة تقدم البرامج: 0%</div><div class="field"><label>وضعية التأطير البيداغوجي</label><textarea id="${e.id}_supervision">${esc(e.evaluation.supervision)}</textarea></div><div class="field"><label>الصعوبات والنقائص</label><textarea id="${e.id}_difficulties">${esc(e.evaluation.difficulties)}</textarea></div><div class="field"><label>التدابير التصحيحية المتخذة</label><textarea id="${e.id}_measures">${esc(e.evaluation.measures)}</textarea></div></div>
+ </div></article>`).join('');
+ entries.forEach(e=>{
+  const root=document.querySelector(`[data-id="${e.id}"]`);
+  root.querySelectorAll('[data-k]').forEach(el=>el.addEventListener('input',()=>{e[el.dataset.k]=el.value;}));
+  const ids=[e.id+'_total',e.id+'_attendanceNotes',e.id+'_reasons',e.id+'_supervision',e.id+'_difficulties',e.id+'_measures',...e.attendance.days.flatMap((d,j)=>[e.id+'_date'+j,e.id+'_present'+j]),...e.program.days.flatMap((d,j)=>[e.id+'_scheduled'+j,e.id+'_actual'+j])];
+  ids.forEach(id=>$(id).addEventListener('input',()=>{syncEntry(e);calculate(e);}));
+  calculate(e);
+ });
+}
+function syncEntry(e){
+ const id=e.id;e.attendance.total=n($(id+'_total').value);
+ e.attendance.days.forEach((d,j)=>{d.date=$(id+'_date'+j).value;d.present=n($(id+'_present'+j).value);});
+ e.attendance.notes=$(id+'_attendanceNotes').value;
+ e.program.days.forEach((d,j)=>{d.scheduled=n($(id+'_scheduled'+j).value);d.actual=n($(id+'_actual'+j).value);});
+ e.program.reasons=$(id+'_reasons').value;
+ e.evaluation.supervision=$(id+'_supervision').value;e.evaluation.difficulties=$(id+'_difficulties').value;e.evaluation.measures=$(id+'_measures').value;
+ e.institution=document.querySelector(`[data-id="${id}"] [data-k="institution"]`).value;
+ e.specialty=document.querySelector(`[data-id="${id}"] [data-k="specialty"]`).value;
+}
+function calculate(e){
+ const id=e.id,total=e.attendance.total;
+ const rates=e.attendance.days.map((d,j)=>{let r=pct(d.present,total);let absent=Math.max(0,total-d.present);$(id+'_day'+j).textContent=`الغائبون: ${absent} — نسبة الحضور: ${r.toFixed(2)}%`;return r;});
+ const weekly=rates.reduce((a,b)=>a+b,0)/3;
+ const avgPresent=e.attendance.days.reduce((a,d)=>a+d.present,0)/3;
+ const avgAbsent=e.attendance.days.reduce((a,d)=>a+Math.max(0,total-d.present),0)/3;
+ const scheduled=e.program.days.reduce((a,d)=>a+d.scheduled,0);
+ const actual=e.program.days.reduce((a,d)=>a+d.actual,0);
+ const progress=pct(actual,scheduled),delay=Math.max(0,scheduled-actual);
+ $(id+'_weekly').textContent=`نسبة الحضور الأسبوعية: ${weekly.toFixed(2)}%`;
+ $(id+'_avgPresent').textContent=`متوسط الحاضرين: ${avgPresent.toFixed(2)}`;
+ $(id+'_avgAbsent').textContent=`متوسط الغائبين: ${avgAbsent.toFixed(2)}`;
+ $(id+'_totalScheduled').textContent=`إجمالي الساعات المبرمجة: ${scheduled.toFixed(2)}`;
+ $(id+'_totalActual').textContent=`إجمالي الساعات المنجزة: ${actual.toFixed(2)}`;
+ $(id+'_progress').textContent=`نسبة التقدم الأسبوعية: ${progress.toFixed(2)}%`;
+ $(id+'_delay').textContent=`التأخر المسجل: ${delay.toFixed(2)} ساعة`;
+ $(id+'_evalAttendance').textContent=`نسبة الحضور: ${weekly.toFixed(2)}%`;
+ $(id+'_evalProgress').textContent=`نسبة تقدم البرامج: ${progress.toFixed(2)}%`;
+ e.calculated={rates,weekly,avgPresent,avgAbsent,scheduled,actual,progress,delay};
+}
+function collect(){
+ entries.forEach(e=>syncEntry(e));entries.forEach(e=>calculate(e));
+ return {week:$('week').value,startDate:$('startDate').value,endDate:$('endDate').value,institution:$('institutionName').value,sender:$('sender').value,submittedAt:new Date().toISOString(),entries:JSON.parse(JSON.stringify(entries))};
+}
+function renderPreview(){
+ const p=collect(),es=p.entries;
+ const avg=(key)=>es.length?es.reduce((a,e)=>a+(e.calculated?.[key]||0),0)/es.length:0;
+ $('summary').innerHTML=`<div><b>${es.length}</b><br><span class="small">التخصصات</span></div><div><b>${avg('weekly').toFixed(2)}%</b><br><span class="small">متوسط الحضور</span></div><div><b>${avg('progress').toFixed(2)}%</b><br><span class="small">متوسط تقدم البرامج</span></div><div><b>${esc(p.week||'—')}</b><br><span class="small">الأسبوع رقم</span></div>`;
+ const t1=es.map((e,i)=>`<tr><td>${i+1}</td><td>${esc(e.institution)}</td><td>${esc(e.specialty)}</td><td>${e.attendance.total}</td>${e.attendance.days.map((d,j)=>`<td>${esc(d.date)}</td><td>${d.present}</td><td>${Math.max(0,e.attendance.total-d.present)}</td><td>${e.calculated.rates[j].toFixed(2)}%</td>`).join('')}<td>${e.calculated.weekly.toFixed(2)}%</td><td>${e.calculated.avgPresent.toFixed(2)}</td><td>${e.calculated.avgAbsent.toFixed(2)}</td><td>${esc(e.attendance.notes)}</td></tr>`).join('');
+ const t2=es.map((e,i)=>`<tr><td>${i+1}</td><td>${esc(e.institution)}</td><td>${esc(e.specialty)}</td>${e.program.days.map(d=>`<td>${d.scheduled}</td><td>${d.actual}</td>`).join('')}<td>${e.calculated.scheduled.toFixed(2)}</td><td>${e.calculated.actual.toFixed(2)}</td><td>${e.calculated.progress.toFixed(2)}%</td><td>${e.calculated.delay.toFixed(2)}</td><td>${esc(e.program.reasons)}</td></tr>`).join('');
+ const t3=es.map((e,i)=>`<tr><td>${i+1}</td><td>${esc(e.institution)}</td><td>${esc(e.specialty)}</td><td>${e.calculated.weekly.toFixed(2)}%</td><td>${e.calculated.progress.toFixed(2)}%</td><td>${esc(e.evaluation.supervision)}</td><td>${esc(e.evaluation.difficulties)}</td><td>${esc(e.evaluation.measures)}</td></tr>`).join('');
+ $('tables').innerHTML=`
+  <h3>الجدول رقم 01: المتابعة الأسبوعية لحضور وغياب المتربصين</h3><div class="tablewrap"><table><thead><tr><th rowspan="2">رقم</th><th rowspan="2">المؤسسة التكوينية</th><th rowspan="2">التخصص</th><th rowspan="2">العدد الإجمالي</th><th colspan="4">اليوم الأول</th><th colspan="4">اليوم الثاني</th><th colspan="4">اليوم الثالث</th><th rowspan="2">نسبة الحضور الأسبوعية</th><th rowspan="2">متوسط الحاضرين</th><th rowspan="2">متوسط الغائبين</th><th rowspan="2">ملاحظات التخصص</th></tr><tr>${[1,2,3].map(x=>'<th>التاريخ</th><th>حاضر</th><th>غائب</th><th>%</th>').join('')}</tr></thead><tbody>${t1}</tbody></table></div>
+  <h3 style="margin-top:24px">الجدول رقم 02: المتابعة الأسبوعية لنسبة تقدم تنفيذ البرامج التكوينية</h3><div class="tablewrap"><table><thead><tr><th>رقم</th><th>المؤسسة</th><th>التخصص</th><th>المبرمج - الأول</th><th>المنجز - الأول</th><th>المبرمج - الثاني</th><th>المنجز - الثاني</th><th>المبرمج - الثالث</th><th>المنجز - الثالث</th><th>إجمالي المبرمج</th><th>إجمالي المنجز</th><th>نسبة التقدم</th><th>التأخر (ساعات)</th><th>الأسباب</th></tr></thead><tbody>${t2}</tbody></table></div>
+ <h3 style="margin-top:24px">الجدول رقم 03: الحصيلة الأسبوعية والتقييم العام</h3><div class="tablewrap"><table><thead><tr><th>رقم</th><th>المؤسسة</th><th>التخصص</th><th>نسبة الحضور</th><th>نسبة تقدم البرامج</th><th>وضعية التأطير البيداغوجي</th><th>الصعوبات والنقائص</th><th>التدابير التصحيحية</th></tr></thead><tbody>${t3}</tbody></table></div>`;
+}
+function csvCell(v){return '"'+String(v??'').replace(/"/g,'""')+'"';}
+function download(name,content,type){const a=document.createElement('a');const blob=new Blob(['\ufeff'+content],{type});a.href=URL.createObjectURL(blob);a.download=name;a.click();URL.revokeObjectURL(a.href);}
+function exportCsv(){
+ const p=collect(),es=p.entries,meta=[['الأسبوع',p.week],['من',p.startDate],['إلى',p.endDate]];
+ const table1=[['رقم','المؤسسة التكوينية','التخصص','العدد الإجمالي','تاريخ 1','حاضر 1','غائب 1','نسبة 1','تاريخ 2','حاضر 2','غائب 2','نسبة 2','تاريخ 3','حاضر 3','غائب 3','نسبة 3','نسبة الحضور الأسبوعية','متوسط الحاضرين','متوسط الغائبين','ملاحظات التخصص']];
+ const table2=[['رقم','المؤسسة','التخصص','المبرمج - الأول','المنجز - الأول','المبرمج - الثاني','المنجز - الثاني','المبرمج - الثالث','المنجز - الثالث','إجمالي المبرمج','إجمالي المنجز','نسبة التقدم','التأخر','الأسباب']];
+ const table3=[['رقم','المؤسسة','التخصص','نسبة الحضور','نسبة تقدم البرامج','وضعية التأطير','الصعوبات والنقائص','التدابير التصحيحية']];
+ es.forEach((e,i)=>{table1.push([i+1,e.institution,e.specialty,e.attendance.total,...e.attendance.days.flatMap((d,j)=>[d.date,d.present,Math.max(0,e.attendance.total-d.present),e.calculated.rates[j].toFixed(2)+'%']),e.calculated.weekly.toFixed(2)+'%',e.calculated.avgPresent.toFixed(2),e.calculated.avgAbsent.toFixed(2),e.attendance.notes]);table2.push([i+1,e.institution,e.specialty,...e.program.days.flatMap(d=>[d.scheduled,d.actual]),e.calculated.scheduled,e.calculated.actual,e.calculated.progress.toFixed(2)+'%',e.calculated.delay,e.program.reasons]);table3.push([i+1,e.institution,e.specialty,e.calculated.weekly.toFixed(2)+'%',e.calculated.progress.toFixed(2)+'%',e.evaluation.supervision,e.evaluation.difficulties,e.evaluation.measures]);});
+ [table1,table2,table3].forEach((t,i)=>download(`صنعة2_الجدول_${i+1}_الأسبوع_${p.week||''}.csv`,[...meta,...t].map(r=>r.map(csvCell).join(';')).join('\r\n'),'text/csv;charset=utf-8'));
+}
+function saveLocal(){const p=collect();localStorage.setItem('san3a2_draft',JSON.stringify(p));alert('تم حفظ المسودة على هذا الجهاز والمتصفح.');}
+function submitReport(){
+ const payload=collect();if(!payload.institution||!payload.entries.length){alert('يرجى تحديد المؤسسة وإدراج تخصص واحد على الأقل.');return;}
+ if(typeof google!=='undefined'&&google.script&&google.script.run){
+  google.script.run.withSuccessHandler(r=>alert(r.message||'تم إرسال التقرير بنجاح.')).withFailureHandler(e=>alert('تعذر الإرسال: '+e.message)).saveSubmission(payload);
+ }else{
+  const all=JSON.parse(localStorage.getItem('san3a2_submissions')||'[]');all.push(payload);localStorage.setItem('san3a2_submissions',JSON.stringify(all));alert('تم حفظ التقرير محلياً فقط. لن يظهر في حساب الإدارة إلا بعد نشر التطبيق عبر Google Apps Script.');
+ }
+}
+function loadAdmin(){
+ const pin=$('adminPin').value;if(!pin){alert('أدخل رمز الإدارة.');return;}
+ if(!(typeof google!=='undefined'&&google.script&&google.script.run)){alert('لوحة الإدارة المركزية متاحة بعد نشر المشروع على Google Apps Script.');return;}
+ google.script.run.withSuccessHandler(rows=>{$('adminResult').innerHTML=`<p>عدد التقارير المستلمة: <b>${rows.length}</b></p>`+rows.map(r=>`<div class="card"><b>${esc(r.institution)}</b> — الأسبوع ${esc(r.week)} — ${esc(r.submittedAt)} — ${r.count} تخصص</div>`).join('');}).withFailureHandler(e=>alert(e.message)).getDashboard(pin);
+}
+function adminExport(kind){
+ const pin=$('adminPin').value;if(!pin){alert('أدخل رمز الإدارة.');return;}
+ if(!(typeof google!=='undefined'&&google.script&&google.script.run)){alert('التصدير المركزي يتطلب نشر التطبيق على Google Apps Script.');return;}
+ const fn=kind==='excel'?'exportExcel':'exportWord';
+ google.script.run.withSuccessHandler(url=>{if(url)window.open(url,'_blank');}).withFailureHandler(e=>alert(e.message))[fn](pin);
+}
+window.removeEntry=removeEntry;
+init();
+</script></body></html>

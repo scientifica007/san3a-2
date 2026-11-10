@@ -57,7 +57,12 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:30px}
 <p id="authNote" class="muted">الحساب الجديد يحتاج إلى موافقة مسؤول المنصة قبل إرسال التقارير.</p>
 </section>
 <section id="pendingView" class="hidden card narrow">
-<h2 id="pendingTitle">الحساب قيد المراجعة</h2><p id="pendingText">سجّل حسابك بنجاح. سيسمح لك المسؤول بإرسال التقارير بعد اعتماده.</p><button id="refreshApproval">التحقق من الاعتماد</button>
+<h2 id="pendingTitle">الحساب قيد المراجعة</h2><p id="pendingText">سجّل حسابك بنجاح. سيسمح لك المسؤول بإرسال التقارير بعد اعتماده.</p>
+<div id="joinExisting" class="hidden"><p class="notice">إذا كنت تستعمل الحساب نفسه في تطبيق آخر، أرسل طلب الانضمام إلى صنعة 2.</p>
+<div class="field"><label>الاسم والصفة</label><input id="joinName"></div>
+<div class="field"><label>المؤسسة</label><select id="joinInstitution"></select></div>
+<button class="primary" id="joinBtn">طلب الانضمام</button></div>
+<button id="refreshApproval">التحقق من الاعتماد</button>
 </section>
 <section id="memberView" class="hidden">
 <div class="row"><div><h2>استمارة المؤسسة</h2><div id="memberInstitution" class="muted"></div></div><span id="saveState" class="badge">جاهز</span></div>
@@ -101,6 +106,12 @@ async function init(){
  if(!window.supabase){$('authNote').textContent='تعذر تحميل خدمة الدخول. تحقق من الإنترنت وأعد تحميل الصفحة.';return;}
  sb=window.supabase.createClient(SB_URL,SB_KEY);
  $('requestInstitution').innerHTML=INSTITUTIONS.map(x=>'<option>'+esc(x.name)+'</option>').join('');
+ $('joinInstitution').innerHTML=$('requestInstitution').innerHTML;
+ $('joinBtn').onclick=async()=>{
+  const {error}=await sb.rpc('san3a_join',{p_full_name:$('joinName').value.trim(),p_institution:$('joinInstitution').value});
+  if(error)msg('تعذر طلب الانضمام: '+error.message,true);
+  else{msg('تم تقديم طلب الانضمام.');await loadCurrentUser();}
+ };
  $('startDate').value=todayLocal();$('endDate').value=todayLocal();
  $('loginBtn').onclick=login; $('toggleSignup').onclick=()=>{signupMode=!signupMode;$('newFields').classList.toggle('hidden',!signupMode);$('loginBtn').textContent=signupMode?'إنشاء الحساب':'دخول';$('toggleSignup').textContent=signupMode?'لدي حساب بالفعل':'إنشاء حساب جديد';};
  $('logoutBtn').onclick=async()=>{await sb.auth.signOut();user=null;profile=null;closeChannel();show('authView');};
@@ -126,7 +137,7 @@ async function login(){
   if(signupMode){
    const name=$('fullName').value.trim();
    if(!name){msg('أدخل اسمك وصفَتك.',true);return;}
-   const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:name,institution:$('requestInstitution').value},emailRedirectTo:location.origin+location.pathname}});
+   const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:name,institution:$('requestInstitution').value,san3a2:'true'},emailRedirectTo:location.origin+location.pathname}});
    if(error)throw error;
    if(!data.session){msg('تم طلب التسجيل. افحص بريدك لتأكيد الحساب، ثم سجّل الدخول.');return;}
   }else{const {error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;}
@@ -142,7 +153,8 @@ async function loadCurrentUser(){
   const {data,error:pe}=await sb.from('san3a_profiles').select('*').eq('user_id',u.id).maybeSingle();
   if(pe)throw pe;
   profile=data;
-  if(!profile){show('pendingView');$('pendingTitle').textContent='الحساب غير مهيأ';$('pendingText').textContent='لم يُربط هذا الحساب بعد بملف صنعة 2. تواصل مع مسؤول المنصة.';return;}
+  if(!profile){show('pendingView');$('joinExisting').classList.remove('hidden');$('pendingTitle').textContent='طلب الانضمام إلى صنعة 2';$('pendingText').textContent='لم يُسجل هذا الحساب بعد في صنعة 2. حدد المؤسسة وأرسل طلب الانضمام.';return;}
+  $('joinExisting').classList.add('hidden');
   if(profile.status!=='active'){
    show('pendingView');$('pendingTitle').textContent=profile.status==='rejected'?'لم يُعتمد الحساب':'الحساب قيد المراجعة';
    $('pendingText').textContent=profile.status==='rejected'?'اتصل بمسؤول المنصة لتصحيح بيانات المؤسسة.':'ستتمكن من إدخال التقارير بعد اعتماد المؤسسة من مسؤول المنصة.';return;
@@ -155,7 +167,7 @@ function blankEntry(s){return {specialty:s,attendance:{total:0,days:[{date:'',pr
 function asEntries(arr){return Array.isArray(arr)?arr.map(x=>({specialty:String(x.specialty||''),attendance:{total:num(x.attendance?.total),days:[0,1,2].map(i=>({date:x.attendance?.days?.[i]?.date||'',present:num(x.attendance?.days?.[i]?.present)})),notes:x.attendance?.notes||''},program:{days:[0,1,2].map(i=>({scheduled:num(x.program?.days?.[i]?.scheduled),actual:num(x.program?.days?.[i]?.actual)})),reasons:x.program?.reasons||''},evaluation:{supervision:x.evaluation?.supervision||'',difficulties:x.evaluation?.difficulties||'',measures:x.evaluation?.measures||''}})):[];}
 async function initializeMember(){
  currentReport=null;dirty=false;const names=INSTITUTIONS.find(x=>x.name===profile.institution_name)?.specialties||[];
- entries=names.map(blankEntry);renderEntries();await loadReport();
+ entries=names.map(blankEntry);renderEntries();if($('week').value.trim())await loadReport();
 }
 function val(path,v){
  const p=path.split('.'),idx=Number(p[0]),obj=entries[idx];if(!obj)return;

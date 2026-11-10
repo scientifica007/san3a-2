@@ -53,8 +53,18 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:30px}
 <div class="field"><label for="fullName">الاسم والصفة</label><input id="fullName" autocomplete="name"></div>
 <div class="field"><label for="requestInstitution">المؤسسة التكوينية</label><select id="requestInstitution"></select></div>
 </div>
-<div class="actions"><button class="primary" id="loginBtn">دخول</button><button id="toggleSignup">إنشاء حساب جديد</button></div>
+<div class="actions"><button class="primary" id="loginBtn">دخول</button><button id="toggleSignup">إنشاء حساب جديد</button><button id="forgotPassword" type="button">نسيت كلمة المرور؟</button></div>
 <p id="authNote" class="muted">الحساب الجديد يحتاج إلى موافقة مسؤول المنصة قبل إرسال التقارير.</p>
+</section>
+<section id="resetView" class="hidden card narrow">
+ <h2>تعيين كلمة مرور جديدة</h2>
+ <p class="notice">افتح هذه الصفحة من رابط استعادة كلمة المرور الذي وصلك في البريد الإلكتروني. لا تشارك الرابط أو كلمة المرور مع أي شخص.</p>
+ <div class="field"><label for="resetPassword">كلمة المرور الجديدة (8 أحرف على الأقل)</label>
+ <input id="resetPassword" type="password" minlength="8" autocomplete="new-password"></div>
+ <div class="field"><label for="resetPasswordConfirm">تأكيد كلمة المرور الجديدة</label>
+ <input id="resetPasswordConfirm" type="password" minlength="8" autocomplete="new-password"></div>
+ <div class="actions"><button class="primary" id="confirmReset" type="button">حفظ كلمة المرور الجديدة</button></div>
+ <p class="muted">تغيير كلمة مرور حساب Supabase نفسه قد يؤثر على دخولك إلى التطبيقات الأخرى التي تستخدم الحساب ذاته.</p>
 </section>
 <section id="pendingView" class="hidden card narrow">
 <h2 id="pendingTitle">الحساب قيد المراجعة</h2><p id="pendingText">سجّل حسابك بنجاح. سيسمح لك المسؤول بإرسال التقارير بعد اعتماده.</p>
@@ -100,13 +110,13 @@ window.addEventListener('DOMContentLoaded',init);
 const SB_URL='https://uxtsyzyotnohxvopgcmh.supabase.co';
 const SB_KEY='sb_publishable_hObSzRf1Sf9HTrUppubkXA_BKT5ZMJe';
 const INSTITUTIONS=[{"name": "مركز التكوين المهني و التمهين  المحمل", "specialties": ["التلحيم", "الطلاء", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين  خنشلة01", "specialties": ["التلحيم", "الطلاء"]}, {"name": "مركز التكوين المهني و التمهين  لمصارة", "specialties": ["الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين الحامة", "specialties": ["السباكة (التركيب الصحي)"]}, {"name": "مركز التكوين المهني و التمهين أولاد رشاش", "specialties": ["التلحيم", "الطلاء"]}, {"name": "مركز التكوين المهني و التمهين بابار", "specialties": ["التجصيص و BA13", "السباكة", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين تاوزيانت", "specialties": ["الخياطة"]}, {"name": "مركز التكوين المهني و التمهين خنشلة 03", "specialties": ["التجصيص و BA13", "التلحيم", "الطلاء"]}, {"name": "مركز التكوين المهني و التمهين ششار", "specialties": ["التلحيم", "السباكة", "الطلاء", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين طامزة", "specialties": ["التبريد و التكييف"]}, {"name": "مركز التكوين المهني و التمهين عين الطويلة", "specialties": ["السباكة", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين قايس 2", "specialties": ["السباكة (التركيب الصحي)"]}, {"name": "مركز التكوين المهني و التمهين قايس 01", "specialties": ["التبريد و التكييف", "الطلاء", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين متوسة", "specialties": ["الطلاء", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين الرميلة", "specialties": ["التبريد و التكييف", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني والتمهين خنشلة02", "specialties": ["الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين بوحمامة", "specialties": ["التبريد و التكييف", "الطلاء"]}, {"name": "المعهد الوطني المتخصص في التكوين المهني خنشلة", "specialties": ["الكهرباء المعمارية"]}, {"name": "المعهد الوطني المتخصص في التكوين المهني قايس", "specialties": ["التبريد و التكييف"]}];
-let sb,user=null,profile=null,entries=[],currentReport=null,adminReports=[],adminProfiles=[],signupMode=false,dirty=false,saveTimer=null,channel=null;
+let sb,user=null,profile=null,entries=[],currentReport=null,adminReports=[],adminProfiles=[],signupMode=false,dirty=false,saveTimer=null,channel=null,recoveryMode=false;
 const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const num=v=>Math.max(0,Number(v)||0);
 const institutionNames=INSTITUTIONS.map(x=>x.name);
 function msg(t,bad=false){const e=$('message');e.textContent=t;e.className='card show '+(bad?'error':'ok');clearTimeout(msg._t);msg._t=setTimeout(()=>e.classList.remove('show'),6000);}
-function show(id){['authView','pendingView','memberView','adminView'].forEach(x=>$(x).classList.toggle('hidden',x!==id));$('logoutBtn').classList.toggle('hidden',id==='authView');}
+function show(id){['authView','resetView','pendingView','memberView','adminView'].forEach(x=>$(x).classList.toggle('hidden',x!==id));$('logoutBtn').classList.toggle('hidden',id==='authView'||id==='resetView');}
 function todayLocal(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 async function init(){
  if(!window.supabase){$('authNote').textContent='تعذر تحميل خدمة الدخول. تحقق من الإنترنت وأعد تحميل الصفحة.';return;}
@@ -119,7 +129,10 @@ async function init(){
   else{msg('تم تقديم طلب الانضمام.');await loadCurrentUser();}
  };
  $('startDate').value=todayLocal();$('endDate').value=todayLocal();
- $('loginBtn').onclick=login; $('toggleSignup').onclick=()=>{signupMode=!signupMode;$('newFields').classList.toggle('hidden',!signupMode);$('loginBtn').textContent=signupMode?'إنشاء الحساب':'دخول';$('toggleSignup').textContent=signupMode?'لدي حساب بالفعل':'إنشاء حساب جديد';};
+ $('loginBtn').onclick=login;
+ $('forgotPassword').onclick=sendPasswordRecovery;
+ $('confirmReset').onclick=finishPasswordRecovery;
+ $('toggleSignup').onclick=()=>{signupMode=!signupMode;$('newFields').classList.toggle('hidden',!signupMode);$('loginBtn').textContent=signupMode?'إنشاء الحساب':'دخول';$('toggleSignup').textContent=signupMode?'لدي حساب بالفعل':'إنشاء حساب جديد';};
  $('logoutBtn').onclick=async()=>{await sb.auth.signOut();user=null;profile=null;closeChannel();show('authView');};
  $('refreshApproval').onclick=loadCurrentUser;
  $('loadReport').onclick=loadReport;
@@ -132,8 +145,48 @@ async function init(){
  $('downloadAdminCsv').onclick=downloadAdminCsv;
  $('email').onkeydown=$('password').onkeydown=e=>{if(e.key==='Enter')login();};
  ['week','startDate','endDate','sender'].forEach(id=>$(id).addEventListener('change',()=>{dirty=true;$('saveState').textContent='تغييرات غير محفوظة';}));
- sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){user=null;profile=null;closeChannel();show('authView');}});
- await loadCurrentUser();
+ // Supabase emits PASSWORD_RECOVERY when the user follows a recovery link.
+ // Detecting the fragment also prevents the ordinary dashboard from opening before the event is dispatched.
+ const recoveryFragment=new URLSearchParams(location.hash.replace(/^#/,''));
+ if(recoveryFragment.get('type')==='recovery'){recoveryMode=true;show('resetView');}
+ sb.auth.onAuthStateChange((event,session)=>{
+  if(event==='PASSWORD_RECOVERY'){recoveryMode=true;show('resetView');}
+  if(event==='SIGNED_OUT'){user=null;profile=null;closeChannel();if(!recoveryMode)show('authView');}
+ });
+ if(!recoveryMode)await loadCurrentUser();
+}
+async function sendPasswordRecovery(){
+ const email=$('email').value.trim();
+ if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+  msg('اكتب بريدك الإلكتروني أولًا في خانة البريد، ثم اضغط «نسيت كلمة المرور؟».',true);
+  $('email').focus();return;
+ }
+ const btn=$('forgotPassword');btn.disabled=true;
+ try{
+  const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+  if(error)throw error;
+  msg('إن كان هذا البريد مسجّلًا وكانت خدمة البريد مهيّأة، فستصلك رسالة استعادة كلمة المرور. افحص البريد الوارد والرسائل غير المرغوبة.');
+ }catch(e){
+  msg('تعذّر طلب استعادة كلمة المرور: '+e.message+'. قد تحتاج خدمة البريد في Supabase إلى إعداد.',true);
+ }finally{btn.disabled=false;}
+}
+async function finishPasswordRecovery(){
+ const pass=$('resetPassword').value,confirmPass=$('resetPasswordConfirm').value;
+ if(pass.length<8){msg('استخدم كلمة مرور من 8 أحرف على الأقل.',true);return;}
+ if(pass!==confirmPass){msg('كلمتا المرور غير متطابقتين.',true);return;}
+ const btn=$('confirmReset');btn.disabled=true;
+ try{
+  const {data:{user:u},error:authErr}=await sb.auth.getUser();
+  if(authErr||!u)throw new Error('رابط الاستعادة منتهي الصلاحية أو لم يتم تفعيله؛ اطلب رابطًا جديدًا.');
+  const {error}=await sb.auth.updateUser({password:pass});
+  if(error)throw error;
+  $('resetPassword').value='';$('resetPasswordConfirm').value='';
+  // Do not leave a recovery-session signed in. Ask the user to enter their new password normally.
+  await sb.auth.signOut();
+  recoveryMode=false;show('authView');
+  msg('تم تحديث كلمة المرور. سجّل الدخول الآن باستخدام بريدك وكلمة المرور الجديدة.');
+ }catch(e){msg('تعذّر تحديث كلمة المرور: '+e.message,true);}
+ finally{btn.disabled=false;}
 }
 async function login(){
  const email=$('email').value.trim(),password=$('password').value;
@@ -148,10 +201,14 @@ async function login(){
    if(!data.session){msg('تم طلب التسجيل. افحص بريدك لتأكيد الحساب، ثم سجّل الدخول.');return;}
   }else{const {error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;}
   await loadCurrentUser();
- }catch(e){msg('تعذر الدخول أو التسجيل: '+e.message,true);}
+ }catch(e){
+  const wrong=String(e.message||'').toLowerCase().includes('invalid login credentials');
+  msg(wrong?'بيانات الدخول غير صحيحة. استخدم كلمة مرور حساب Supabase، أو اضغط «نسيت كلمة المرور؟» لاستعادتها.':'تعذر الدخول أو التسجيل: '+e.message,true);
+ }
  finally{$('loginBtn').disabled=false;}
 }
 async function loadCurrentUser(){
+ if(recoveryMode){show('resetView');return;}
  try{
   const {data:{user:u},error}=await sb.auth.getUser();if(error)throw error;
   if(!u){user=null;show('authView');return;}

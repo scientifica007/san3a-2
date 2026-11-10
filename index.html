@@ -51,7 +51,9 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:30px}
 <div class="field"><label for="password">كلمة المرور (6 أحرف على الأقل)</label><input id="password" type="password" autocomplete="current-password" required minlength="6"></div>
 <div id="newFields" class="hidden">
 <div class="field"><label for="fullName">الاسم والصفة</label><input id="fullName" autocomplete="name"></div>
-<div class="field"><label for="requestInstitution">المؤسسة التكوينية</label><select id="requestInstitution"></select></div>
+<div class="field"><label for="registrationType">نوع الحساب المطلوب</label>
+ <select id="registrationType"><option value="member">موظف مؤسسة تكوينية</option><option value="admin">مسؤول تشغيل المنصة (بانتظار موافقة المالك)</option></select></div>
+ <div class="field" id="registrationInstitutionField"><label for="requestInstitution">المؤسسة التكوينية</label><select id="requestInstitution"></select></div>
 </div>
 <div class="actions"><button class="primary" id="loginBtn">دخول</button><button id="toggleSignup">إنشاء حساب جديد</button><button id="forgotPassword" type="button">نسيت كلمة المرور؟</button></div>
 <p id="authNote" class="muted">الحساب الجديد يحتاج إلى موافقة مسؤول المنصة قبل إرسال التقارير.</p>
@@ -70,7 +72,9 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:30px}
 <h2 id="pendingTitle">الحساب قيد المراجعة</h2><p id="pendingText">سجّل حسابك بنجاح. سيسمح لك المسؤول بإرسال التقارير بعد اعتماده.</p>
 <div id="joinExisting" class="hidden"><p class="notice">إذا كنت تستعمل الحساب نفسه في تطبيق آخر، أرسل طلب الانضمام إلى صنعة 2.</p>
 <div class="field"><label>الاسم والصفة</label><input id="joinName"></div>
-<div class="field"><label>المؤسسة</label><select id="joinInstitution"></select></div>
+<div class="field"><label for="joinRole">نوع طلب الانضمام</label>
+ <select id="joinRole"><option value="member">موظف مؤسسة</option><option value="admin">طلب إدارة المنصة</option></select></div>
+ <div class="field" id="joinInstitutionField"><label for="joinInstitution">المؤسسة</label><select id="joinInstitution"></select></div>
 <button class="primary" id="joinBtn">طلب الانضمام</button></div>
 <button id="refreshApproval">التحقق من الاعتماد</button>
 </section>
@@ -95,6 +99,8 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:30px}
 <div class="card hidden" id="ownerPanel">
  <div class="row"><div><h2>صلاحيات الإدارة — المالك فقط</h2>
  <p class="muted">يمكنك تعيين مسؤول تشغيل أو إلغاء صلاحياته دون تسليمه حسابك أو كلمة مرورك.</p></div><span class="badge">Owner</span></div>
+ <div class="notice"><b>دعوة المسؤول التشغيلي</b><p class="muted">انسخ هذا الرابط وأرسله للشخص المعني. يسجل بحسابه المستقل، ثم يظهر طلبه أدناه لتوافق عليه. الرابط لا يمنح صلاحية الإدارة تلقائيًا.</p>
+ <div class="row"><input id="adminInvitationLink" type="text" readonly aria-label="رابط طلب صلاحية مسؤول التشغيل" style="flex:1;min-width:230px" dir="ltr"><button id="copyAdminInvitation" type="button">نسخ رابط التسجيل</button></div></div>
  <div class="table-scroll"><table><thead><tr><th>الحساب</th><th>الدور</th><th>الحالة</th><th>إدارة الصلاحية</th></tr></thead><tbody id="ownerUsersBody"></tbody></table></div>
  <p id="roleAudit" class="muted"></p>
 </div>
@@ -115,6 +121,18 @@ const $=id=>document.getElementById(id);
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
 const num=v=>Math.max(0,Number(v)||0);
 const institutionNames=INSTITUTIONS.map(x=>x.name);
+function registrationContext(){
+ return new URLSearchParams(location.search).get('join')==='admin'?'admin':'member';
+}
+function setRequestType(type){
+ const role=type==='admin'?'admin':'member';
+ $('registrationType').value=role;$('joinRole').value=role;
+ $('registrationInstitutionField').classList.toggle('hidden',role==='admin');
+ $('joinInstitutionField').classList.toggle('hidden',role==='admin');
+ $('authNote').textContent=role==='admin'
+  ?'هذا الطلب لا يمنحك صلاحية الإدارة مباشرة. بعد التسجيل وتأكيد البريد عند الحاجة، يوافق مالك المنصة على تعيينك مسؤولًا تشغيليًا.'
+  :'الحساب الجديد يحتاج إلى موافقة مسؤول المنصة قبل إرسال التقارير.';
+}
 function msg(t,bad=false){const e=$('message');e.textContent=t;e.className='card show '+(bad?'error':'ok');clearTimeout(msg._t);msg._t=setTimeout(()=>e.classList.remove('show'),6000);}
 function show(id){['authView','resetView','pendingView','memberView','adminView'].forEach(x=>$(x).classList.toggle('hidden',x!==id));$('logoutBtn').classList.toggle('hidden',id==='authView'||id==='resetView');}
 function todayLocal(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
@@ -123,8 +141,32 @@ async function init(){
  sb=window.supabase.createClient(SB_URL,SB_KEY);
  $('requestInstitution').innerHTML=INSTITUTIONS.map(x=>'<option>'+esc(x.name)+'</option>').join('');
  $('joinInstitution').innerHTML=$('requestInstitution').innerHTML;
+ $('registrationType').onchange=()=>setRequestType($('registrationType').value);
+ $('joinRole').onchange=()=>setRequestType($('joinRole').value);
+ setRequestType(registrationContext());
+ if(registrationContext()==='admin'){
+  signupMode=true;$('newFields').classList.remove('hidden');
+  $('loginBtn').textContent='إنشاء الحساب';$('toggleSignup').textContent='لدي حساب بالفعل';
+ }
+ const adminLink=new URL(location.pathname,location.origin);
+ adminLink.searchParams.set('join','admin');
+ $('adminInvitationLink').value=adminLink.href;
+ $('adminInvitationLink').onclick=()=> $('adminInvitationLink').select();
+ $('copyAdminInvitation').onclick=async()=>{
+  try{
+   await navigator.clipboard.writeText($('adminInvitationLink').value);
+   msg('تم نسخ رابط تسجيل المسؤول التشغيلي. يمكنك إرساله للشخص المعني.');
+  }catch(e){
+   $('adminInvitationLink').focus();$('adminInvitationLink').select();
+   msg('حدّد رابط التسجيل في الحقل، ثم انسخه باستخدام Ctrl+C.');
+  }
+ };
  $('joinBtn').onclick=async()=>{
-  const {error}=await sb.rpc('san3a_join',{p_full_name:$('joinName').value.trim(),p_institution:$('joinInstitution').value});
+  const {error}=await sb.rpc('san3a_request_access',{
+   p_full_name:$('joinName').value.trim(),
+   p_institution:$('joinRole').value==='member' ? $('joinInstitution').value : '',
+   p_requested_role:$('joinRole').value
+  });
   if(error)msg('تعذر طلب الانضمام: '+error.message,true);
   else{msg('تم تقديم طلب الانضمام.');await loadCurrentUser();}
  };
@@ -196,7 +238,11 @@ async function login(){
   if(signupMode){
    const name=$('fullName').value.trim();
    if(!name){msg('أدخل اسمك وصفَتك.',true);return;}
-   const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:name,institution:$('requestInstitution').value,san3a2:'true'},emailRedirectTo:location.origin+location.pathname}});
+   const {data,error}=await sb.auth.signUp({email,password,options:{
+    data:{full_name:name,institution:$('registrationType').value==='member' ? $('requestInstitution').value : '',
+     san3a2:'true',san3a2_intent:$('registrationType').value},
+    emailRedirectTo:location.origin+location.pathname
+   }});
    if(error)throw error;
    if(!data.session){msg('تم طلب التسجيل. افحص بريدك لتأكيد الحساب، ثم سجّل الدخول.');return;}
   }else{const {error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;}
@@ -216,11 +262,20 @@ async function loadCurrentUser(){
   const {data,error:pe}=await sb.from('san3a_profiles').select('*').eq('user_id',u.id).maybeSingle();
   if(pe)throw pe;
   profile=data;
-  if(!profile){show('pendingView');$('joinExisting').classList.remove('hidden');$('pendingTitle').textContent='طلب الانضمام إلى صنعة 2';$('pendingText').textContent='لم يُسجل هذا الحساب بعد في صنعة 2. حدد المؤسسة وأرسل طلب الانضمام.';return;}
+  if(!profile){
+    show('pendingView');$('joinExisting').classList.remove('hidden');
+    $('pendingTitle').textContent='طلب الانضمام إلى صنعة 2';
+    $('pendingText').textContent='هذا الحساب مستخدم في خدمة أخرى. حدد نوع طلب الانضمام، ثم أرسله للمراجعة.';
+    return;
+   }
   $('joinExisting').classList.add('hidden');
   if(profile.status!=='active'){
    show('pendingView');$('pendingTitle').textContent=profile.status==='rejected'?'لم يُعتمد الحساب':'الحساب قيد المراجعة';
-   $('pendingText').textContent=profile.status==='rejected'?'اتصل بمسؤول المنصة لتصحيح بيانات المؤسسة.':'ستتمكن من إدخال التقارير بعد اعتماد المؤسسة من مسؤول المنصة.';return;
+   $('pendingText').textContent=profile.status==='rejected'
+    ?'لم يُقبل طلبك. تواصل مع إدارة المنصة لمعرفة السبب.'
+    :profile.requested_role==='admin'
+     ?'تم تسجيل طلب إدارة المنصة. تنتظر موافقة المالك لتفعيل صلاحية Admin.'
+     :'ستتمكن من إدخال التقارير بعد اعتماد المؤسسة من مسؤول المنصة.';return;
   }
   if(profile.role==='admin'||profile.role==='owner'){
    show('adminView');$('ownerPanel').classList.toggle('hidden',profile.role!=='owner');
@@ -338,7 +393,7 @@ async function refreshAdmin(){
  const [ps,rs]=await Promise.all([sb.from('san3a_profiles').select('*').order('created_at',{ascending:false}),sb.from('san3a_reports').select('*').order('updated_at',{ascending:false})]);
  if(ps.error||rs.error){msg('تعذر تحميل لوحة الإدارة: '+(ps.error||rs.error).message,true);return;}
  adminProfiles=ps.data||[];adminReports=rs.data||[];
- $('adminStats').innerHTML=[['المؤسسات',new Set(adminProfiles.filter(p=>p.status==='active'&&p.role==='member').map(p=>p.institution_name)).size],['التقارير المرسلة',adminReports.filter(r=>r.status==='submitted').length],['المسودات',adminReports.filter(r=>r.status==='draft').length],['طلبات انتظار الاعتماد',adminProfiles.filter(p=>p.role==='member'&&p.status==='pending').length]].map(a=>'<div class="stat"><span class="muted">'+a[0]+'</span><b>'+a[1]+'</b></div>').join('');
+ $('adminStats').innerHTML=[['المؤسسات',new Set(adminProfiles.filter(p=>p.status==='active'&&p.role==='member').map(p=>p.institution_name)).size],['التقارير المرسلة',adminReports.filter(r=>r.status==='submitted').length],['المسودات',adminReports.filter(r=>r.status==='draft').length],['طلبات انتظار الاعتماد',adminProfiles.filter(p=>p.role==='member'&&p.requested_role!=='admin'&&p.status==='pending').length]].map(a=>'<div class="stat"><span class="muted">'+a[0]+'</span><b>'+a[1]+'</b></div>').join('');
  renderProfiles();renderReports();
  if(profile?.role==='owner') await renderOwnerUsers();
 }
@@ -349,7 +404,10 @@ async function renderOwnerUsers(){
   if(p.role==='admin')action='<button class="danger" data-revoke-admin="'+esc(p.user_id)+'">إلغاء صلاحية Admin</button>';
   else if(p.role==='member'&&p.user_id!==user.id)
    action='<button class="primary" data-grant-admin="'+esc(p.user_id)+'">تعيين Admin</button>';
-  return '<tr><td><b>'+esc(p.full_name||'—')+'</b><div class="muted">'+esc(p.email)+'</div></td><td>'+esc(roleName[p.role]||p.role)+'</td><td>'+esc(p.status==='active'?'نشط':p.status==='pending'?'في انتظار الاعتماد':'مرفوض')+'</td><td>'+action+'</td></tr>';
+  return '<tr><td><b>'+esc(p.full_name||'—')+'</b><div class="muted">'+esc(p.email)+'</div></td><td>'+
+    esc(roleName[p.role]||p.role)+(p.role==='member'&&p.requested_role==='admin'
+     ?'<div class="badge">طلب مسؤول تشغيل</div>':'')+
+    '</td><td>'+esc(p.status==='active'?'نشط':p.status==='pending'?'في انتظار الاعتماد':'مرفوض')+'</td><td>'+action+'</td></tr>';
  }).join('');
  $('ownerUsersBody').querySelectorAll('[data-grant-admin]').forEach(btn=>btn.onclick=()=>changeAdminRole(btn.dataset.grantAdmin,true));
  $('ownerUsersBody').querySelectorAll('[data-revoke-admin]').forEach(btn=>btn.onclick=()=>changeAdminRole(btn.dataset.revokeAdmin,false));
@@ -374,7 +432,7 @@ async function changeAdminRole(targetId,grant){
  }catch(e){msg('تعذر تغيير الصلاحية: '+e.message,true);if(btn)btn.disabled=false;}
 }
 function renderProfiles(){
- const p=adminProfiles.filter(x=>x.role==='member');
+ const p=adminProfiles.filter(x=>x.role==='member'&&x.requested_role!=='admin');
  $('accountsBody').innerHTML=p.length?p.map(x=>'<tr><td><b>'+esc(x.full_name||'—')+'</b><div class="muted">'+esc(x.email)+'</div></td><td>'+esc(x.requested_institution)+'</td><td>'+esc(x.status)+'</td><td>'+
  (x.status==='pending'?'<button data-approve="'+esc(x.user_id)+'" class="primary">اعتماد</button> <button data-reject="'+esc(x.user_id)+'">رفض</button>':'<span class="muted">'+esc(x.institution_name||'—')+'</span>')+'</td></tr>').join(''):'<tr><td colspan="4">لا توجد حسابات مؤسسات.</td></tr>';
  $('accountsBody').querySelectorAll('[data-approve]').forEach(btn=>btn.onclick=()=>reviewMember(btn.dataset.approve,true));

@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#163d63">
+<title>صنعة 2 | المتابعة الأسبوعية المباشرة</title>
+<style>
+:root{--navy:#153953;--blue:#126ac4;--bg:#f2f6fa;--line:#d9e2eb;--muted:#637488;--green:#16805e;--red:#a82f37}
+*{box-sizing:border-box}body{margin:0;font:16px/1.7 system-ui,"Noto Sans Arabic",Arial,sans-serif;background:var(--bg);color:#182e41}
+header{background:#fff;border-bottom:1px solid var(--line);padding:14px max(20px,calc((100% - 1180px)/2));display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:12px}.logo-mark{background:var(--navy);color:white;padding:7px 12px;border-radius:12px;font-weight:800;font-size:20px}
+h1{font-size:21px;margin:0}h2{font-size:19px;margin:0 0 15px}h3{font-size:16px;margin:0 0 10px}
+header small{color:var(--muted);display:block}main{max-width:1180px;margin:24px auto;padding:0 15px}
+.card{background:white;border:1px solid var(--line);border-radius:14px;padding:20px;margin-bottom:16px;box-shadow:0 2px 9px #1539530b}
+.narrow{max-width:510px;margin:35px auto}.row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+label{display:block;font-weight:650;font-size:14px;margin-bottom:5px}
+input,select,textarea{width:100%;font:inherit;padding:10px 12px;border:1px solid #b8cad7;background:white;border-radius:8px;color:#152f44;min-width:0}
+textarea{min-height:67px;resize:vertical}input:focus,textarea:focus,select:focus{outline:2px solid #c8e3ff;border-color:var(--blue)}
+button{font:inherit;cursor:pointer;border:1px solid #b9cad7;border-radius:9px;background:white;padding:9px 16px;color:#193954;font-weight:700}
+button.primary{background:var(--blue);color:white;border-color:var(--blue)}button.danger{color:var(--red);border-color:#efbec2}button:disabled{opacity:.5;cursor:not-allowed}
+.actions{display:flex;gap:9px;flex-wrap:wrap;margin:15px 0}.muted{color:var(--muted);font-size:13px}
+.notice{background:#e9f3ff;border:1px solid #cfe4fb;padding:12px;border-radius:9px;margin:12px 0}.success{background:#e5f6ee;border-color:#b5dfc8}.warning{background:#fff5dc;border-color:#efdea7}
+.hidden{display:none!important}.error{color:var(--red)}.ok{color:var(--green)}.badge{font-size:12px;padding:3px 10px;border-radius:30px;background:#e8eff6;white-space:nowrap}
+.spec{border:1px solid var(--line);border-radius:12px;margin-bottom:14px;overflow:hidden;background:white}
+.spec>summary{cursor:pointer;background:#f2f7fc;padding:13px;font-weight:750;list-style:none;display:flex;justify-content:space-between;gap:10px}
+.spec-body{padding:16px}.section-head{font-weight:700;color:var(--blue);margin:18px 0 8px;padding-bottom:5px;border-bottom:1px solid var(--line)}
+.days{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}
+.day{padding:13px;border:1px solid var(--line);border-radius:9px}.day strong{display:block;margin-bottom:10px}
+.field{margin-bottom:10px}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.stat{background:#f1f7fc;padding:13px;border-radius:9px;border:1px solid var(--line)}
+.stat b{font-size:22px;display:block;color:#153953}
+table{border-collapse:collapse;width:100%;font-size:13px}td,th{border-bottom:1px solid var(--line);text-align:right;padding:10px;vertical-align:top}
+th{background:#f0f5fa;color:#26465f}.table-scroll{overflow:auto}
+.tabbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:15px}.tabbar button.active{color:white;background:var(--navy)}
+#message{position:sticky;top:0;z-index:9;display:none}#message.show{display:block}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:30px}
+@media(max-width:750px){.grid,.days{grid-template-columns:1fr}.stats{grid-template-columns:repeat(2,1fr)}.card{padding:14px}.narrow{margin:18px auto}header{padding:12px}h1{font-size:18px}button{min-height:43px}}
+@media print{header,footer,.actions,.tabbar,#authView,#message,.no-print{display:none!important}body{background:white}.card{border:0;box-shadow:none}details.spec{break-inside:avoid}details.spec>summary{background:white}}
+</style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.57.0/dist/umd/supabase.min.js" defer></script>
+</head>
+<body>
+<header><div class="logo"><span class="logo-mark">ص2</span><div><h1>المتابعة الأسبوعية — صنعة 2</h1><small>منصة المؤسسات التكوينية | ولاية خنشلة</small></div></div><div class="row"><span id="userLabel" class="muted"></span><button id="logoutBtn" class="hidden">تسجيل الخروج</button></div></header>
+<main>
+<div id="message" class="card" role="status" aria-live="polite"></div>
+<section id="authView" class="card narrow">
+<h2>الدخول إلى منصة صنعة 2</h2>
+<p class="muted">سجل بالبريد الإلكتروني وكلمة المرور. لا تحتاج إلى تنزيل ملفات أو استخدام Gmail لإرسال التقارير.</p>
+<div class="field"><label for="email">البريد الإلكتروني</label><input id="email" type="email" autocomplete="email" required placeholder="example@gmail.com"></div>
+<div class="field"><label for="password">كلمة المرور (6 أحرف على الأقل)</label><input id="password" type="password" autocomplete="current-password" required minlength="6"></div>
+<div id="newFields" class="hidden">
+<div class="field"><label for="fullName">الاسم والصفة</label><input id="fullName" autocomplete="name"></div>
+<div class="field"><label for="requestInstitution">المؤسسة التكوينية</label><select id="requestInstitution"></select></div>
+</div>
+<div class="actions"><button class="primary" id="loginBtn">دخول</button><button id="toggleSignup">إنشاء حساب جديد</button></div>
+<p id="authNote" class="muted">الحساب الجديد يحتاج إلى موافقة مسؤول المنصة قبل إرسال التقارير.</p>
+</section>
+<section id="pendingView" class="hidden card narrow">
+<h2 id="pendingTitle">الحساب قيد المراجعة</h2><p id="pendingText">سجّل حسابك بنجاح. سيسمح لك المسؤول بإرسال التقارير بعد اعتماده.</p><button id="refreshApproval">التحقق من الاعتماد</button>
+</section>
+<section id="memberView" class="hidden">
+<div class="row"><div><h2>استمارة المؤسسة</h2><div id="memberInstitution" class="muted"></div></div><span id="saveState" class="badge">جاهز</span></div>
+<div class="card">
+<div class="grid">
+<div><label for="week">الأسبوع رقم</label><input id="week" placeholder="مثال: 01" maxlength="20"></div>
+<div><label for="startDate">من تاريخ</label><input id="startDate" type="date"></div>
+<div><label for="endDate">إلى تاريخ</label><input id="endDate" type="date"></div>
+<div><label for="sender">المسؤول عن التقرير</label><input id="sender" placeholder="الاسم والصفة"></div>
+</div>
+<p class="notice">أدخل البيانات ثم اضغط «حفظ مسودة». لا يحتاج الموظف إلى أي إجراء آخر لإرسال التقرير سوى زر «اعتماد وإرسال التقرير».</p>
+<div class="actions"><button id="loadReport">فتح تقرير الأسبوع</button><button id="addSpecialty">+ تخصص إضافي</button><button id="saveDraft" class="primary">حفظ مسودة</button><button id="submitReport" class="primary">اعتماد وإرسال التقرير</button></div>
+</div>
+<div class="card"><div class="row"><h2>التخصصات التكوينية</h2><span id="specCount" class="badge"></span></div><div id="specialties"></div></div>
+<div class="card"><h2>مؤشرات التقرير</h2><div class="stats" id="memberStats"></div><div class="actions"><button id="exportCsv">تنزيل نسخة CSV (اختياري)</button></div></div>
+</section>
+<section id="adminView" class="hidden">
+<div class="row"><h2>لوحة المتابعة المركزية</h2><button id="refreshAdmin">تحديث البيانات</button></div>
+<div class="stats" id="adminStats"></div>
+<div class="card"><h2>طلبات اعتماد حسابات المؤسسات</h2><div class="table-scroll"><table><thead><tr><th>المستخدم</th><th>المؤسسة المطلوبة</th><th>الحالة</th><th>الإجراء</th></tr></thead><tbody id="accountsBody"></tbody></table></div></div>
+<div class="card"><div class="row"><h2>تقارير المؤسسات</h2><div class="actions"><select id="reportFilter" aria-label="حالة التقرير"><option value="all">جميع التقارير</option><option value="submitted">المرسلة فقط</option><option value="draft">المسودات</option></select><button id="downloadAdminCsv">تصدير سجل التقارير</button></div></div>
+<div class="table-scroll"><table><thead><tr><th>المؤسسة</th><th>المستخدم</th><th>الأسبوع</th><th>الحالة</th><th>آخر تحديث</th><th>عرض</th></tr></thead><tbody id="reportsBody"></tbody></table></div>
+</div>
+<div class="card hidden" id="reportDetails"></div>
+</section>
+</main><footer>صنعة 2 — النظام الإلكتروني للمتابعة الأسبوعية</footer>
+<script>
+window.addEventListener('DOMContentLoaded',init);
+const SB_URL='https://uxtsyzyotnohxvopgcmh.supabase.co';
+const SB_KEY='sb_publishable_hObSzRf1Sf9HTrUppubkXA_BKT5ZMJe';
+const INSTITUTIONS=[{"name": "مركز التكوين المهني و التمهين  المحمل", "specialties": ["التلحيم", "الطلاء", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين  خنشلة01", "specialties": ["التلحيم", "الطلاء"]}, {"name": "مركز التكوين المهني و التمهين  لمصارة", "specialties": ["الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين الحامة", "specialties": ["السباكة (التركيب الصحي)"]}, {"name": "مركز التكوين المهني و التمهين أولاد رشاش", "specialties": ["التلحيم", "الطلاء"]}, {"name": "مركز التكوين المهني و التمهين بابار", "specialties": ["التجصيص و BA13", "السباكة", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين تاوزيانت", "specialties": ["الخياطة"]}, {"name": "مركز التكوين المهني و التمهين خنشلة 03", "specialties": ["التجصيص و BA13", "التلحيم", "الطلاء"]}, {"name": "مركز التكوين المهني و التمهين ششار", "specialties": ["التلحيم", "السباكة", "الطلاء", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين طامزة", "specialties": ["التبريد و التكييف"]}, {"name": "مركز التكوين المهني و التمهين عين الطويلة", "specialties": ["السباكة", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين قايس 2", "specialties": ["السباكة (التركيب الصحي)"]}, {"name": "مركز التكوين المهني و التمهين قايس 01", "specialties": ["التبريد و التكييف", "الطلاء", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين متوسة", "specialties": ["الطلاء", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين الرميلة", "specialties": ["التبريد و التكييف", "الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني والتمهين خنشلة02", "specialties": ["الكهرباء المعمارية"]}, {"name": "مركز التكوين المهني و التمهين بوحمامة", "specialties": ["التبريد و التكييف", "الطلاء"]}, {"name": "المعهد الوطني المتخصص في التكوين المهني خنشلة", "specialties": ["الكهرباء المعمارية"]}, {"name": "المعهد الوطني المتخصص في التكوين المهني قايس", "specialties": ["التبريد و التكييف"]}];
+let sb,user=null,profile=null,entries=[],currentReport=null,adminReports=[],adminProfiles=[],signupMode=false,dirty=false,saveTimer=null,channel=null;
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+const num=v=>Math.max(0,Number(v)||0);
+const institutionNames=INSTITUTIONS.map(x=>x.name);
+function msg(t,bad=false){const e=$('message');e.textContent=t;e.className='card show '+(bad?'error':'ok');clearTimeout(msg._t);msg._t=setTimeout(()=>e.classList.remove('show'),6000);}
+function show(id){['authView','pendingView','memberView','adminView'].forEach(x=>$(x).classList.toggle('hidden',x!==id));$('logoutBtn').classList.toggle('hidden',id==='authView');}
+function todayLocal(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
+async function init(){
+ if(!window.supabase){$('authNote').textContent='تعذر تحميل خدمة الدخول. تحقق من الإنترنت وأعد تحميل الصفحة.';return;}
+ sb=window.supabase.createClient(SB_URL,SB_KEY);
+ $('requestInstitution').innerHTML=INSTITUTIONS.map(x=>'<option>'+esc(x.name)+'</option>').join('');
+ $('startDate').value=todayLocal();$('endDate').value=todayLocal();
+ $('loginBtn').onclick=login; $('toggleSignup').onclick=()=>{signupMode=!signupMode;$('newFields').classList.toggle('hidden',!signupMode);$('loginBtn').textContent=signupMode?'إنشاء الحساب':'دخول';$('toggleSignup').textContent=signupMode?'لدي حساب بالفعل':'إنشاء حساب جديد';};
+ $('logoutBtn').onclick=async()=>{await sb.auth.signOut();user=null;profile=null;closeChannel();show('authView');};
+ $('refreshApproval').onclick=loadCurrentUser;
+ $('loadReport').onclick=loadReport;
+ $('saveDraft').onclick=()=>saveReport('draft',true);
+ $('submitReport').onclick=submitReport;
+ $('addSpecialty').onclick=()=>{entries.push(blankEntry('تخصص جديد'));renderEntries();scheduleSave();};
+ $('exportCsv').onclick=exportCsv;
+ $('refreshAdmin').onclick=refreshAdmin;
+ $('reportFilter').onchange=renderReports;
+ $('downloadAdminCsv').onclick=downloadAdminCsv;
+ $('email').onkeydown=$('password').onkeydown=e=>{if(e.key==='Enter')login();};
+ ['week','startDate','endDate','sender'].forEach(id=>$(id).addEventListener('change',()=>{dirty=true;$('saveState').textContent='تغييرات غير محفوظة';}));
+ sb.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'){user=null;profile=null;closeChannel();show('authView');}});
+ await loadCurrentUser();
+}
+async function login(){
+ const email=$('email').value.trim(),password=$('password').value;
+ if(!email||password.length<6){msg('أدخل البريد الإلكتروني وكلمة مرور لا تقل عن 6 أحرف.',true);return;}
+ $('loginBtn').disabled=true;
+ try{
+  if(signupMode){
+   const name=$('fullName').value.trim();
+   if(!name){msg('أدخل اسمك وصفَتك.',true);return;}
+   const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:name,institution:$('requestInstitution').value},emailRedirectTo:location.origin+location.pathname}});
+   if(error)throw error;
+   if(!data.session){msg('تم طلب التسجيل. افحص بريدك لتأكيد الحساب، ثم سجّل الدخول.');return;}
+  }else{const {error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;}
+  await loadCurrentUser();
+ }catch(e){msg('تعذر الدخول أو التسجيل: '+e.message,true);}
+ finally{$('loginBtn').disabled=false;}
+}
+async function loadCurrentUser(){
+ try{
+  const {data:{user:u},error}=await sb.auth.getUser();if(error)throw error;
+  if(!u){user=null;show('authView');return;}
+  user=u;$('userLabel').textContent=u.email;
+  const {data,error:pe}=await sb.from('san3a_profiles').select('*').eq('user_id',u.id).maybeSingle();
+  if(pe)throw pe;
+  profile=data;
+  if(!profile){show('pendingView');$('pendingTitle').textContent='الحساب غير مهيأ';$('pendingText').textContent='لم يُربط هذا الحساب بعد بملف صنعة 2. تواصل مع مسؤول المنصة.';return;}
+  if(profile.status!=='active'){
+   show('pendingView');$('pendingTitle').textContent=profile.status==='rejected'?'لم يُعتمد الحساب':'الحساب قيد المراجعة';
+   $('pendingText').textContent=profile.status==='rejected'?'اتصل بمسؤول المنصة لتصحيح بيانات المؤسسة.':'ستتمكن من إدخال التقارير بعد اعتماد المؤسسة من مسؤول المنصة.';return;
+  }
+  if(profile.role==='admin'){show('adminView');await refreshAdmin();subscribeAdmin();}
+  else{show('memberView');$('memberInstitution').textContent=profile.institution_name||'';await initializeMember();}
+ }catch(e){msg('تعذر تحميل الحساب: '+e.message,true);show('authView');}
+}
+function blankEntry(s){return {specialty:s,attendance:{total:0,days:[{date:'',present:0},{date:'',present:0},{date:'',present:0}],notes:''},program:{days:[{scheduled:0,actual:0},{scheduled:0,actual:0},{scheduled:0,actual:0}],reasons:''},evaluation:{supervision:'',difficulties:'',measures:''}};}
+function asEntries(arr){return Array.isArray(arr)?arr.map(x=>({specialty:String(x.specialty||''),attendance:{total:num(x.attendance?.total),days:[0,1,2].map(i=>({date:x.attendance?.days?.[i]?.date||'',present:num(x.attendance?.days?.[i]?.present)})),notes:x.attendance?.notes||''},program:{days:[0,1,2].map(i=>({scheduled:num(x.program?.days?.[i]?.scheduled),actual:num(x.program?.days?.[i]?.actual)})),reasons:x.program?.reasons||''},evaluation:{supervision:x.evaluation?.supervision||'',difficulties:x.evaluation?.difficulties||'',measures:x.evaluation?.measures||''}})):[];}
+async function initializeMember(){
+ currentReport=null;dirty=false;const names=INSTITUTIONS.find(x=>x.name===profile.institution_name)?.specialties||[];
+ entries=names.map(blankEntry);renderEntries();await loadReport();
+}
+function val(path,v){
+ const p=path.split('.'),idx=Number(p[0]),obj=entries[idx];if(!obj)return;
+ let target=obj;for(let i=1;i<p.length-1;i++)target=target[p[i]];
+ const last=p[p.length-1];
+ target[last]=['total','present','scheduled','actual'].includes(last)?num(v):v;
+ dirty=true;$('saveState').textContent='تغييرات غير محفوظة';updateStats();scheduleSave();
+}
+function fld(path,label,value,type='text'){
+ const id='v_'+path.replace(/[^a-zA-Z0-9]/g,'_');
+ const attrib=type==='number'?' min="0" step="any"':'';
+ return '<div class="field"><label for="'+id+'">'+label+'</label><input id="'+id+'" data-path="'+esc(path)+'" type="'+type+'" value="'+esc(value)+'"'+attrib+'></div>';
+}
+function area(path,label,value){return '<div class="field"><label>'+label+'</label><textarea data-path="'+esc(path)+'">'+esc(value)+'</textarea></div>';}
+function renderEntries(){
+ $('specCount').textContent=entries.length+' تخصص';
+ $('specialties').innerHTML=entries.map((e,i)=>'<details class="spec" '+(i===0?'open':'')+'><summary><span>'+(i+1)+'. '+esc(e.specialty||'تخصص')+'</span><span class="muted">اضغط لفتح الاستمارة</span></summary><div class="spec-body">'+
+ fld(i+'.specialty','تسمية التخصص',e.specialty)+
+ '<div class="section-head">01 — حضور وغياب المتربصين</div>'+
+ fld(i+'.attendance.total','العدد الإجمالي للمتربصين',e.attendance.total,'number')+
+ '<div class="days">'+e.attendance.days.map((d,j)=>'<div class="day"><strong>اليوم '+(j+1)+'</strong>'+
+ fld(i+'.attendance.days.'+j+'.date','التاريخ',d.date,'date')+
+ fld(i+'.attendance.days.'+j+'.present','عدد الحاضرين',d.present,'number')+'</div>').join('')+'</div>'+
+ area(i+'.attendance.notes','ملاحظات الحضور',e.attendance.notes)+
+ '<div class="section-head">02 — تنفيذ البرنامج التكويني</div>'+
+ '<div class="days">'+e.program.days.map((d,j)=>'<div class="day"><strong>اليوم '+(j+1)+'</strong>'+
+ fld(i+'.program.days.'+j+'.scheduled','ساعات مبرمجة',d.scheduled,'number')+
+ fld(i+'.program.days.'+j+'.actual','ساعات منجزة',d.actual,'number')+'</div>').join('')+'</div>'+
+ area(i+'.program.reasons','أسباب التأخر',e.program.reasons)+
+ '<div class="section-head">03 — الحصيلة والتقييم العام</div>'+
+ area(i+'.evaluation.supervision','التأطير البيداغوجي',e.evaluation.supervision)+
+ area(i+'.evaluation.difficulties','الصعوبات والنقائص',e.evaluation.difficulties)+
+ area(i+'.evaluation.measures','التدابير التصحيحية',e.evaluation.measures)+
+ '<button class="danger no-print" type="button" data-remove="'+i+'">حذف هذا التخصص</button></div></details>').join('');
+ $('specialties').querySelectorAll('[data-path]').forEach(el=>el.addEventListener('input',()=>{val(el.dataset.path,el.value);if(el.dataset.path.endsWith('.specialty'))el.closest('details').querySelector('summary span').textContent=el.value;}));
+ $('specialties').querySelectorAll('[data-remove]').forEach(el=>el.onclick=()=>{if(!confirm('حذف التخصص من الاستمارة؟'))return;entries.splice(Number(el.dataset.remove),1);dirty=true;renderEntries();scheduleSave();});
+ updateStats();
+}
+function metrics(e){
+ const t=num(e.attendance.total),days=e.attendance.days.filter(d=>d.date),present=days.reduce((a,d)=>a+num(d.present),0);
+ const sched=e.program.days.reduce((a,d)=>a+num(d.scheduled),0),actual=e.program.days.reduce((a,d)=>a+num(d.actual),0);
+ return {attendance:days.length&&t?100*present/(days.length*t):0,scheduled:sched,actual:actual,progress:sched?100*actual/sched:0,absent:days.length*t-present};
+}
+function updateStats(){
+ const m=entries.map(metrics),mean=k=>m.length?m.reduce((s,x)=>s+x[k],0)/m.length:0;
+ $('memberStats').innerHTML=[
+  ['التخصصات',entries.length],['متوسط الحضور',mean('attendance').toFixed(1)+'%'],
+  ['الساعات المبرمجة',m.reduce((s,x)=>s+x.scheduled,0).toFixed(1)],
+  ['الساعات المنجزة',m.reduce((s,x)=>s+x.actual,0).toFixed(1)]
+ ].map(a=>'<div class="stat"><span class="muted">'+a[0]+'</span><b>'+a[1]+'</b></div>').join('');
+}
+function reportKeyValid(){if(!$('week').value.trim()||!$('startDate').value||!$('endDate').value){msg('حدد رقم الأسبوع وتاريخ البداية والنهاية أولًا.',true);return false;}if($('startDate').value>$('endDate').value){msg('يجب أن يكون تاريخ البداية قبل النهاية.',true);return false;}return true;}
+function validateSubmission(){
+ if(!entries.length){msg('أضف تخصصًا واحدًا على الأقل.',true);return false;}
+ for(const e of entries){
+  if(!e.specialty.trim()||e.attendance.total<=0){msg('أكمل اسم التخصص وعدد المتربصين: '+e.specialty,true);return false;}
+  if(!e.attendance.days.some(d=>!!d.date)){msg('أدخل تاريخ يوم تكوين واحد على الأقل للتخصص: '+e.specialty,true);return false;}
+  if(e.attendance.days.some(d=>d.present>e.attendance.total)){msg('عدد الحاضرين يفوق المسجلين في: '+e.specialty,true);return false;}
+ }
+ return true;
+}
+function scheduleSave(){clearTimeout(saveTimer);if(profile?.role!=='member'||currentReport?.status==='submitted'||!$('week').value.trim()||!$('startDate').value)return;
+ saveTimer=setTimeout(()=>saveReport('draft',false),2200);}
+async function saveReport(status,notify){
+ clearTimeout(saveTimer);if(!reportKeyValid())return false;
+ if(status==='submitted'&&!validateSubmission())return false;
+ if(currentReport?.status==='submitted'){msg('هذا التقرير مرسل ولا يمكن تعديله إلا بعد إعادة فتحه من المسؤول.',true);return false;}
+ $('saveState').textContent='جارٍ الحفظ...';
+ const payload={user_id:user.id,institution_name:profile.institution_name,week:$('week').value.trim(),start_date:$('startDate').value,end_date:$('endDate').value,sender:$('sender').value.trim(),entries:entries,status,updated_at:new Date().toISOString(),submitted_at:status==='submitted'?new Date().toISOString():null};
+ try{
+  // If the key changes, create an independent weekly report instead of overwriting another week.
+  const {data,error}=await sb.from('san3a_reports').upsert(payload,{onConflict:'user_id,week,start_date'}).select('*').single();
+  if(error)throw error;currentReport=data;dirty=false;$('saveState').textContent=status==='submitted'?'تم الإرسال':'محفوظ في السحابة';
+  if(status==='submitted'){renderEntries();$('specialties').querySelectorAll('input,textarea,button').forEach(x=>x.disabled=true);$('submitReport').disabled=true;$('saveDraft').disabled=true;}
+  if(notify)msg(status==='submitted'?'وصل التقرير إلى لوحة المتابعة المركزية.':'تم حفظ المسودة على الموقع بنجاح.');
+  return true;
+ }catch(e){$('saveState').textContent='تعذر الحفظ';if(notify||status==='submitted')msg('تعذر الحفظ: '+e.message,true);return false;}
+}
+async function submitReport(){if(!confirm('هل تؤكد إرسال التقرير الأسبوعي نهائيًا؟'))return;await saveReport('submitted',true);}
+async function loadReport(){
+ if(!reportKeyValid())return;
+ if(dirty&&!confirm('هناك تعديلات لم تحفظ بعد. هل تريد متابعة فتح تقرير الأسبوع؟'))return;
+ const {data,error}=await sb.from('san3a_reports').select('*').eq('user_id',user.id).eq('week',$('week').value.trim()).eq('start_date',$('startDate').value).maybeSingle();
+ if(error){msg(error.message,true);return;}
+ currentReport=data;dirty=false;
+ if(data){$('endDate').value=data.end_date;$('sender').value=data.sender;entries=asEntries(data.entries);
+ $('saveState').textContent=data.status==='submitted'?'تقرير مرسل':'مسودة محفوظة';}
+ else {const list=INSTITUTIONS.find(x=>x.name===profile.institution_name)?.specialties||[];entries=list.map(blankEntry);$('saveState').textContent='تقرير جديد';}
+ renderEntries();
+ const locked=data?.status==='submitted';$('specialties').querySelectorAll('input,textarea,button').forEach(x=>x.disabled=locked);
+ $('submitReport').disabled=locked;$('saveDraft').disabled=locked;$('addSpecialty').disabled=locked;
+ if(data)msg('تم فتح التقرير المحفوظ لهذا الأسبوع.');
+}
+function csv(rows){return rows.map(r=>r.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(';')).join('\r\n');}
+function download(name,text){const blob=new Blob(['\ufeff'+text],{type:'text/csv;charset=utf-8'});const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);}
+function exportCsv(){
+ const rows=[['المؤسسة',profile.institution_name],['الأسبوع',$('week').value],[],['التخصص','العدد','الحضور %','الساعات المبرمجة','الساعات المنجزة','نسبة التنفيذ %','التأطير','الصعوبات','التدابير']];
+ entries.forEach(e=>{const m=metrics(e);rows.push([e.specialty,e.attendance.total,m.attendance.toFixed(2),m.scheduled,m.actual,m.progress.toFixed(2),e.evaluation.supervision,e.evaluation.difficulties,e.evaluation.measures]);});
+ download('san3a2_week_'+$('week').value+'.csv',csv(rows));
+}
+async function refreshAdmin(){
+ const [ps,rs]=await Promise.all([sb.from('san3a_profiles').select('*').order('created_at',{ascending:false}),sb.from('san3a_reports').select('*').order('updated_at',{ascending:false})]);
+ if(ps.error||rs.error){msg('تعذر تحميل لوحة الإدارة: '+(ps.error||rs.error).message,true);return;}
+ adminProfiles=ps.data||[];adminReports=rs.data||[];
+ $('adminStats').innerHTML=[['المؤسسات',new Set(adminProfiles.filter(p=>p.status==='active'&&p.role==='member').map(p=>p.institution_name)).size],['التقارير المرسلة',adminReports.filter(r=>r.status==='submitted').length],['المسودات',adminReports.filter(r=>r.status==='draft').length],['طلبات انتظار الاعتماد',adminProfiles.filter(p=>p.role==='member'&&p.status==='pending').length]].map(a=>'<div class="stat"><span class="muted">'+a[0]+'</span><b>'+a[1]+'</b></div>').join('');
+ renderProfiles();renderReports();
+}
+function renderProfiles(){
+ const p=adminProfiles.filter(x=>x.role==='member');
+ $('accountsBody').innerHTML=p.length?p.map(x=>'<tr><td><b>'+esc(x.full_name||'—')+'</b><div class="muted">'+esc(x.email)+'</div></td><td>'+esc(x.requested_institution)+'</td><td>'+esc(x.status)+'</td><td>'+
+ (x.status==='pending'?'<button data-approve="'+esc(x.user_id)+'" class="primary">اعتماد</button> <button data-reject="'+esc(x.user_id)+'">رفض</button>':'<span class="muted">'+esc(x.institution_name||'—')+'</span>')+'</td></tr>').join(''):'<tr><td colspan="4">لا توجد حسابات مؤسسات.</td></tr>';
+ $('accountsBody').querySelectorAll('[data-approve]').forEach(btn=>btn.onclick=()=>reviewMember(btn.dataset.approve,true));
+ $('accountsBody').querySelectorAll('[data-reject]').forEach(btn=>btn.onclick=()=>reviewMember(btn.dataset.reject,false));
+}
+async function reviewMember(id,approved){
+ const p=adminProfiles.find(x=>x.user_id===id);if(!p)return;
+ let name=p.requested_institution;
+ if(approved){name=prompt('اعتماد الحساب للمؤسسة التالية (يمكن تصحيح الاسم):',name);if(name===null)return;if(!name.trim()){msg('اسم المؤسسة مطلوب.',true);return;}}
+ else if(!confirm('رفض هذا الحساب؟'))return;
+ const {error}=await sb.rpc('san3a_review_member',{p_user_id:id,p_approved:approved,p_institution:approved?name:null});
+ if(error)msg(error.message,true);else{msg('تم تحديث حالة الحساب.');await refreshAdmin();}
+}
+function renderReports(){
+ const filter=$('reportFilter').value,items=adminReports.filter(r=>filter==='all'||r.status===filter);
+ $('reportsBody').innerHTML=items.length?items.map(r=>{
+ const userInfo=adminProfiles.find(p=>p.user_id===r.user_id);
+ return '<tr><td>'+esc(r.institution_name)+'</td><td>'+esc(userInfo?.full_name||userInfo?.email||'—')+'</td><td>'+esc(r.week)+'<div class="muted">'+esc(r.start_date)+' — '+esc(r.end_date)+'</div></td><td>'+esc(r.status==='submitted'?'مرسل':'مسودة')+'</td><td>'+esc(new Date(r.updated_at).toLocaleString('ar-DZ'))+'</td><td><button data-report="'+esc(r.id)+'">تفاصيل</button></td></tr>';
+ }).join(''):'<tr><td colspan="6">لا توجد تقارير مطابقة.</td></tr>';
+ $('reportsBody').querySelectorAll('[data-report]').forEach(btn=>btn.onclick=()=>showReport(btn.dataset.report));
+}
+function showReport(id){
+ const r=adminReports.find(x=>x.id===id);if(!r)return;
+ const box=$('reportDetails');box.classList.remove('hidden');
+ const rows=asEntries(r.entries);
+ box.innerHTML='<div class="row"><h2>تفاصيل التقرير — '+esc(r.institution_name)+'</h2><button id="hideDetails">إغلاق</button></div>'+
+ '<p class="muted">الأسبوع: '+esc(r.week)+' — '+esc(r.start_date)+' إلى '+esc(r.end_date)+' — الحالة: '+esc(r.status)+'</p>'+
+ '<div class="table-scroll"><table><thead><tr><th>التخصص</th><th>المسجلون</th><th>الحضور %</th><th>الساعات المبرمجة</th><th>المنجزة</th><th>نسبة الإنجاز %</th><th>التأطير</th><th>الصعوبات</th><th>التدابير</th></tr></thead><tbody>'+
+ rows.map(e=>{const m=metrics(e);return '<tr><td>'+esc(e.specialty)+'</td><td>'+e.attendance.total+'</td><td>'+m.attendance.toFixed(1)+'%</td><td>'+m.scheduled+'</td><td>'+m.actual+'</td><td>'+m.progress.toFixed(1)+'%</td><td>'+esc(e.evaluation.supervision)+'</td><td>'+esc(e.evaluation.difficulties)+'</td><td>'+esc(e.evaluation.measures)+'</td></tr>';}).join('')+
+ '</tbody></table></div>'+(r.status==='submitted'?'<div class="actions"><button id="reopenReport">إعادة فتح التقرير للتعديل</button></div>':'');
+ $('hideDetails').onclick=()=>box.classList.add('hidden');
+ if($('reopenReport'))$('reopenReport').onclick=async()=>{if(!confirm('السماح للمؤسسة بتعديل التقرير مجددًا؟'))return;const {error}=await sb.rpc('san3a_reopen_report',{p_report_id:r.id});if(error)msg(error.message,true);else{msg('تم إعادة فتح التقرير.');await refreshAdmin();box.classList.add('hidden');}};
+ box.scrollIntoView({behavior:'smooth',block:'start'});
+}
+function downloadAdminCsv(){download('san3a2_all_reports.csv',csv([['المؤسسة','الأسبوع','من','إلى','الحالة','عدد التخصصات','تاريخ التحديث'],...adminReports.map(r=>[r.institution_name,r.week,r.start_date,r.end_date,r.status,r.entries.length,r.updated_at])]));}
+function closeChannel(){if(channel&&sb){sb.removeChannel(channel);channel=null;}}
+function subscribeAdmin(){
+ closeChannel();
+ channel=sb.channel('san3a-dashboard')
+ .on('postgres_changes',{event:'*',schema:'public',table:'san3a_reports'},()=>refreshAdmin())
+ .on('postgres_changes',{event:'*',schema:'public',table:'san3a_profiles'},()=>refreshAdmin()).subscribe();
+}
+</script></body></html>
